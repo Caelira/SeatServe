@@ -23,13 +23,14 @@ public class ProductDAO {
             String full = scanner.nextLine();
             String[] parts = full.split(",");
 
-            if (parts.length >= 5) {
+            if (parts.length >= 6) {
                 products.add(new Product(
                         parts[0],
                         parts[1],
-                        Double.valueOf(parts[2]),
+                        Double.parseDouble(parts[2]),
+                        parts[3].trim(),
                         parts[4].trim(),
-                        parts[3].trim()
+                        Integer.parseInt(parts[5].trim())
                 ));
             }
         }

@@ -5,6 +5,10 @@ module org.example.angelsburgerpos {
     requires com.dlsc.formsfx;
     requires java.desktop;
 
+    opens org.example.angelsburgerpos.model to javafx.base;
+
+
+
     opens org.example.angelsburgerpos to javafx.fxml;
     exports org.example.angelsburgerpos;
     exports org.example.angelsburgerpos.controller;

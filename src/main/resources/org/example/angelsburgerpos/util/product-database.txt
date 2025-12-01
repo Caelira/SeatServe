@@ -1,13 +1,25 @@
-101,Buy 1 Take 1 Hamburger,35.00,/images/burger_plain.png,Burger
-102,Buy 1 Take 1 Cheeseburger,45.00,/images/burger_cheese.png,Burger
-103,Buy 1 Take 1 Coleslaw Burger,50.00,/images/burger_coleslaw.png,Burger
-104,Buy 1 Take 1 Hotdog Sandwich,40.00,/images/hotdog_plain.png,Sandwich
-201,Hungarian Sausage Sandwich,60.00,/images/sandwich_hungarian.png,Sandwich
-202,Cheesedog Footlong,55.00,/images/sandwich_footlong.png,Sandwich
-203,Ham and Egg Sandwich,35.00,/images/sandwich_hamegg.png,Sandwich
-204,Bacon and Egg Sandwich,45.00,/images/sandwich_bacon.png,Sandwich
-301,Coca Cola Mismo,20.00,/images/drink_coke.png,Drink
-302,Royal Mismo,20.00,/images/drink_royal.png,Drink
-303,Mineral Water 500ml,15.00,/images/drink_water.png,Drink
-401,Extra Cheese Slice,5.00,/images/addon_cheese.png,Addon
-402,Extra Mayo Sachet,3.00,/images/addon_mayo.png,Addon
+B01,Beef Burger Sandwich (B1T1),40.00,/images/burger_beef.png,Burger,100
+B02,Cheeseburger Sandwich (B1T1),50.00,/images/burger_cheese.png,Burger,100
+S01,Cheesy Hotdog Sandwich (B1T1),37.00,/images/hotdog_cheesy.png,Sandwich,100
+S02,Jumbo Cheese Footlong Sandwich,56.00,/images/footlong_cheese.png,Sandwich,100
+S03,Cheesy Hungarian Sandwich,70.00,/images/hungarian_cheesy.png,Sandwich,100
+S04,Ham Sandwich,18.00,/images/ham.png,Sandwich,100
+S05,Ham & Cheese Sandwich,23.00,/images/ham_cheese.png,Sandwich,100
+S06,Ham & Egg Sandwich,30.00,/images/ham_egg.png,Sandwich,100
+S07,Ham Cheese & Egg Sandwich,35.00,/images/ham_cheese_egg.png,Sandwich,100
+S08,Bacon Sandwich,25.00,/images/bacon.png,Sandwich,100
+S09,Bacon & Cheese Sandwich,30.00,/images/bacon_cheese.png,Sandwich,100
+S10,Bacon & Egg Sandwich,37.00,/images/bacon_egg.png,Sandwich,100
+S11,Bacon Cheese & Egg Sandwich,42.00,/images/bacon_cheese_egg.png,Sandwich,100
+S12,Egg Sandwich,20.00,/images/egg.png,Sandwich,100
+A01,Extra Cheese,5.00,/images/addon_cheese.png,Addon,100
+A02,Extra Egg,15.00,/images/addon_egg.png,Addon,100
+A03,Extra Ham,14.00,/images/addon_ham.png,Addon,100
+A04,Extra Bacon,25.00,/images/addon_bacon.png,Addon,100
+D01,Liptod Iced Tea,35.00,/images/iced_tea.png,Drink,100
+D02,Bottled Water,15.00,/images/water.png,Drink,100
+D03,Mug (Glass),20.00,/images/mug.png,Drink,100
+D04,Mirinda (Glass),20.00,/images/mirinda.png,Drink,100
+D05,Pepsi (Glass),20.00,/images/pepsi.png,Drink,100
+D06,7-Up (Glass),20.00,/images/7up.png,Drink,100
+D07,Softdrinks (Plastic Bottle),25.00,/images/softdrink_plastic.png,Drink,100

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="TOP_CENTER" prefHeight="550.0" prefWidth="420.0" spacing="15.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-width: 2;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.angelsburgerpos.controller.CheckoutController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+        <Label text="PAYMENT">
+            <font>
+                <Font name="System Bold" size="24.0" />
+            </font>
+        </Label>
+
+        <VBox fx:id="paymentContainer" alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
+            <children>
+                <Label text="Total Amount Due">
+                    <font><Font size="14.0" /></font>
+                </Label>
+                <Label fx:id="totalLabel" text="P 0.00" textFill="#d32f2f">
+                    <font><Font name="System Bold" size="36.0" /></font>
+                </Label>
+
+                <Label text="Enter Cash Amount:">
+                    <VBox.margin><Insets top="20.0" /></VBox.margin>
+                </Label>
+                <TextField fx:id="cashInput" alignment="CENTER" promptText="0.00" style="-fx-font-size: 18px;">
+                    <font><Font size="18.0" /></font>
+                </TextField>
+
+                <Label fx:id="changeLabel" text="Change: P 0.00" textFill="#2e7d32">
+                    <font><Font name="System Bold" size="18.0" /></font>
+                    <VBox.margin><Insets top="10.0" /></VBox.margin>
+                </Label>
+
+                <Button mnemonicParsing="false" onAction="#confirmPayment" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-cursor: hand;" text="CONFIRM &amp; PRINT">
+                    <font><Font name="System Bold" size="14.0" /></font>
+                    <VBox.margin><Insets top="20.0" /></VBox.margin>
+                </Button>
+            </children>
+        </VBox>
+
+        <VBox fx:id="receiptContainer" managed="false" visible="false" spacing="10" VBox.vgrow="ALWAYS">
+            <TextArea fx:id="receiptArea" editable="false" prefHeight="400.0" style="-fx-font-family: 'Monospaced'; -fx-font-size: 12; -fx-control-inner-background: white; -fx-background-color: white; -fx-text-box-border: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" wrapText="true" />
+            <Button mnemonicParsing="false" onAction="#closeWindow" prefWidth="Infinity" style="-fx-background-color: #555; -fx-text-fill: white;" text="DONE (CLOSE)" />
+        </VBox>
+
+    </children>
+</VBox>

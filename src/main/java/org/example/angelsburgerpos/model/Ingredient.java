@@ -1,60 +1,35 @@
 package org.example.angelsburgerpos.model;
 
 public class Ingredient {
-    private String ID;
+    private String id;
     private String name;
+    private int stock;
     private String unit;
-    private Double stock;
-    private int level;
 
-    public Ingredient() {
-    }
-
-    public Ingredient(String ID, String name, String unit, Double stock, int level) {
-        this.ID = ID;
+    public Ingredient(String id, String name, int stock, String unit) {
+        this.id = id;
         this.name = name;
-        this.unit = unit;
         this.stock = stock;
-        this.level = level;
+        this.unit = unit;
     }
 
-    public String getID() {
-        return ID;
-    }
-
-    public void setID(String ID) {
-        this.ID = ID;
+    public String getId() {
+        return id;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
     }
 
     public String getUnit() {
         return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
-
-    public Double getStock() {
-        return stock;
-    }
-
-    public void setStock(Double stock) {
-        this.stock = stock;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
     }
 }

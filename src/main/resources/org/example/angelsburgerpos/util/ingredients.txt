@@ -1,0 +1,17 @@
+I01,Burger Bun,198,pcs
+I02,Footlong Bun,100,pcs
+I03,Beef Patty,200,pcs
+I04,Hotdog,98,pcs
+I05,Hungarian Sausage,50,pcs
+I06,Footlong Hotdog,50,pcs
+I07,Ham Slice,100,pcs
+I08,Bacon Slice,100,pcs
+I09,Egg,120,pcs
+I10,Cheese Slice,198,pcs
+I11,Cucumber Slice,100,pcs
+I12,Coleslaw Mix,50,portions
+I13,Mayo Sachet,298,pcs
+I14,Ketchup Sachet,298,pcs
+I15,Hot Sauce Sachet,100,pcs
+I16,Plastic Cup (Small),200,pcs
+I17,Plastic Bottle (Empty),100,pcs
