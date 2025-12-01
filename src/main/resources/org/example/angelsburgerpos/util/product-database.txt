@@ -1,0 +1,13 @@
+101,Buy 1 Take 1 Hamburger,35.00,/images/burger_plain.png,Burger
+102,Buy 1 Take 1 Cheeseburger,45.00,/images/burger_cheese.png,Burger
+103,Buy 1 Take 1 Coleslaw Burger,50.00,/images/burger_coleslaw.png,Burger
+104,Buy 1 Take 1 Hotdog Sandwich,40.00,/images/hotdog_plain.png,Sandwich
+201,Hungarian Sausage Sandwich,60.00,/images/sandwich_hungarian.png,Sandwich
+202,Cheesedog Footlong,55.00,/images/sandwich_footlong.png,Sandwich
+203,Ham and Egg Sandwich,35.00,/images/sandwich_hamegg.png,Sandwich
+204,Bacon and Egg Sandwich,45.00,/images/sandwich_bacon.png,Sandwich
+301,Coca Cola Mismo,20.00,/images/drink_coke.png,Drink
+302,Royal Mismo,20.00,/images/drink_royal.png,Drink
+303,Mineral Water 500ml,15.00,/images/drink_water.png,Drink
+401,Extra Cheese Slice,5.00,/images/addon_cheese.png,Addon
+402,Extra Mayo Sachet,3.00,/images/addon_mayo.png,Addon

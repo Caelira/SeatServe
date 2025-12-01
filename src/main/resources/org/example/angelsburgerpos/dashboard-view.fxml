@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.angelsburgerpos.controller.DashboardController">
+   <top>
+      <AnchorPane prefHeight="42.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="nameLabel" layoutX="14.0" layoutY="13.0" text="Prince II L Olaguera" />
+            <Label fx:id="dateLabel" layoutX="146.0" layoutY="13.0" text="Date&amp;Time:" />
+            <Label layoutX="509.0" layoutY="7.0" prefHeight="16.0" prefWidth="181.0" text="ANGELS BURGER">
+               <font>
+                  <Font name="Bernard MT Condensed" size="22.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+   </top>
+   <left>
+      <AnchorPane prefHeight="358.0" prefWidth="173.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="logoutButton" layoutX="31.0" layoutY="679.0" mnemonicParsing="false" prefHeight="29.0" prefWidth="114.0">
+               <graphic>
+                  <HBox prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label />
+                        <Label text="       Logout" />
+                     </children>
+                  </HBox>
+               </graphic>
+            </Button>
+            <HBox layoutX="41.0" layoutY="44.0" prefHeight="42.0" prefWidth="104.0">
+               <children>
+                  <Label fx:id="logoLabel" prefHeight="51.0" prefWidth="125.0" text="Logo/Profile" />
+               </children>
+            </HBox>
+            <Button fx:id="inventoryButton" layoutX="29.0" layoutY="386.0" mnemonicParsing="false" onAction="#inventoryClicked" prefHeight="29.0" prefWidth="114.0">
+               <graphic>
+                  <HBox prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label />
+                        <Label text="       Inventory" />
+                     </children>
+                  </HBox>
+               </graphic>
+            </Button>
+            <Button fx:id="burgersButton1" layoutX="29.0" layoutY="336.0" mnemonicParsing="false" prefHeight="29.0" prefWidth="114.0">
+               <graphic>
+                  <HBox prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label />
+                        <Label text="       Reports" />
+                     </children>
+                  </HBox>
+               </graphic>
+            </Button>
+            <Button fx:id="inventoryButton1" layoutX="29.0" layoutY="440.0" mnemonicParsing="false" onAction="#inventoryClicked" prefHeight="29.0" prefWidth="114.0">
+               <graphic>
+                  <HBox prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label />
+                        <Label text="       Emplolyees" />
+                     </children>
+                  </HBox>
+               </graphic>
+            </Button>
+            <Button fx:id="burgersButton11" layoutX="29.0" layoutY="288.0" mnemonicParsing="false" prefHeight="29.0" prefWidth="114.0">
+               <graphic>
+                  <HBox prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label />
+                        <Label text="       Menu" />
+                     </children>
+                  </HBox>
+               </graphic>
+            </Button>
+         </children>
+      </AnchorPane>
+   </left>
+   <center>
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox layoutX="332.0" layoutY="217.0" prefHeight="757.6" prefWidth="1026.4" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <AnchorPane prefHeight="102.0" prefWidth="1026.0">
+                     <children>
+                        <Button fx:id="burgersButton" layoutX="33.0" layoutY="10.0" mnemonicParsing="false" prefHeight="29.0" prefWidth="114.0">
+                           <graphic>
+                              <HBox prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <Label />
+                                    <Label text="       Burgers" />
+                                 </children>
+                              </HBox>
+                           </graphic>
+                        </Button>
+                        <Button fx:id="sandwichesButton" layoutX="199.0" layoutY="10.0" mnemonicParsing="false" prefHeight="29.0" prefWidth="114.0">
+                           <graphic>
+                              <HBox prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <Label />
+                                    <Label text="       Sandwiches" />
+                                 </children>
+                              </HBox>
+                           </graphic>
+                        </Button>
+                        <Button fx:id="drinksButton" layoutX="363.0" layoutY="10.0" mnemonicParsing="false" prefHeight="29.0" prefWidth="114.0">
+                           <graphic>
+                              <HBox prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <Label />
+                                    <Label text="       Drinks" />
+                                 </children>
+                              </HBox>
+                           </graphic>
+                        </Button>
+                     </children>
+                  </AnchorPane>
+                  <ScrollPane prefHeight="681.0" prefWidth="1026.0">
+                     <content>
+                        <FlowPane fx:id="menuContainer" prefHeight="681.0" prefWidth="1026.0" />
+                     </content>
+                  </ScrollPane>
+                  <AnchorPane prefHeight="118.0" prefWidth="1026.0" />
+               </children>
+            </VBox>
+         </children>
+      </AnchorPane>
+   </center>
+</BorderPane>
