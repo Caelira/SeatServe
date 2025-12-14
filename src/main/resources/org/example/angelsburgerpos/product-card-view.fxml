@@ -7,12 +7,12 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="productCard" prefHeight="256.0" prefWidth="180.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.angelsburgerpos.controller.ProductCardController">
+<AnchorPane fx:id="productCard" prefHeight="300.0" prefWidth="250.0" stylesheets="@css/card-design.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.angelsburgerpos.controller.ProductCardController">
    <children>
-      <AnchorPane layoutX="152.0" layoutY="38.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <AnchorPane fx:id="imageCard" layoutX="152.0" layoutY="38.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <ImageView fx:id="productImage" fitHeight="97.0" fitWidth="127.0" layoutX="26.0" layoutY="31.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="27.0" AnchorPane.rightAnchor="27.0" />
-            <Label fx:id="productLabel" layoutX="77.0" layoutY="140.0" text="Label" />
+            <ImageView fx:id="productImage" fitHeight="137.0" fitWidth="183.0" layoutX="39.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="39.0" AnchorPane.rightAnchor="39.0" />
+            <Label fx:id="productLabel" layoutX="27.0" layoutY="170.0" text="Label" />
             <Label fx:id="productPrice" layoutX="27.0" layoutY="204.0" prefHeight="32.0" prefWidth="55.0" text="Price">
                <font>
                   <Font size="18.0" />

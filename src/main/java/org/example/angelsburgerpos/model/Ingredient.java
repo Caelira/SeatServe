@@ -32,4 +32,8 @@ public class Ingredient {
     public String getUnit() {
         return unit;
     }
+
+    public void reduceStock(int quantity){
+        stock -= quantity;
+    }
 }

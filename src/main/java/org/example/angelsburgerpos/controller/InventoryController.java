@@ -30,7 +30,6 @@ public class InventoryController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Link Table Columns to Ingredient.java fields
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
@@ -40,7 +39,6 @@ public class InventoryController implements Initializable {
     }
 
     private void loadIngredients() {
-        // Reads from the INGREDIENTS file, not the product file
         InputStream is = getClass().getResourceAsStream("/org/example/angelsburgerpos/util/ingredients.txt");
         if (is != null) {
             Scanner scanner = new Scanner(is);
@@ -61,6 +59,9 @@ public class InventoryController implements Initializable {
         inventoryTable.setItems(ingredientList);
     }
 
+    public void load(){
+        loadIngredients();
+    }
     @FXML
     private void addStock() {
         Ingredient selected = inventoryTable.getSelectionModel().getSelectedItem();

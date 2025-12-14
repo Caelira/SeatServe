@@ -1,25 +1,25 @@
-B01,Beef Burger Sandwich (B1T1),40.00,/images/burger_beef.png,Burger,100
-B02,Cheeseburger Sandwich (B1T1),50.00,/images/burger_cheese.png,Burger,100
-S01,Cheesy Hotdog Sandwich (B1T1),37.00,/images/hotdog_cheesy.png,Sandwich,100
-S02,Jumbo Cheese Footlong Sandwich,56.00,/images/footlong_cheese.png,Sandwich,100
-S03,Cheesy Hungarian Sandwich,70.00,/images/hungarian_cheesy.png,Sandwich,100
-S04,Ham Sandwich,18.00,/images/ham.png,Sandwich,100
-S05,Ham & Cheese Sandwich,23.00,/images/ham_cheese.png,Sandwich,100
-S06,Ham & Egg Sandwich,30.00,/images/ham_egg.png,Sandwich,100
-S07,Ham Cheese & Egg Sandwich,35.00,/images/ham_cheese_egg.png,Sandwich,100
-S08,Bacon Sandwich,25.00,/images/bacon.png,Sandwich,100
-S09,Bacon & Cheese Sandwich,30.00,/images/bacon_cheese.png,Sandwich,100
-S10,Bacon & Egg Sandwich,37.00,/images/bacon_egg.png,Sandwich,100
-S11,Bacon Cheese & Egg Sandwich,42.00,/images/bacon_cheese_egg.png,Sandwich,100
-S12,Egg Sandwich,20.00,/images/egg.png,Sandwich,100
-A01,Extra Cheese,5.00,/images/addon_cheese.png,Addon,100
-A02,Extra Egg,15.00,/images/addon_egg.png,Addon,100
-A03,Extra Ham,14.00,/images/addon_ham.png,Addon,100
-A04,Extra Bacon,25.00,/images/addon_bacon.png,Addon,100
-D01,Liptod Iced Tea,35.00,/images/iced_tea.png,Drink,100
-D02,Bottled Water,15.00,/images/water.png,Drink,100
-D03,Mug (Glass),20.00,/images/mug.png,Drink,100
-D04,Mirinda (Glass),20.00,/images/mirinda.png,Drink,100
-D05,Pepsi (Glass),20.00,/images/pepsi.png,Drink,100
-D06,7-Up (Glass),20.00,/images/7up.png,Drink,100
-D07,Softdrinks (Plastic Bottle),25.00,/images/softdrink_plastic.png,Drink,100
+B01,Beef Burger Sandwich (B1T1),40.00,/org/example/angelsburgerpos/images/Beef Burger Sandwich.jpg,Burger,100
+B02,Cheeseburger Sandwich (B1T1),50.00,/org/example/angelsburgerpos/images/Cheeseburger Sandwich.jpg,Burger,100
+S01,Cheesy Hotdog Sandwich (B1T1),37.00,/org/example/angelsburgerpos/images/Cheesy Hotdog Sandwich.jpg,Sandwich,100
+S02,Jumbo Cheese Footlong Sandwich,56.00,/org/example/angelsburgerpos/images/Jumbo Cheese Footlong Sandwich.jpg,Sandwich,100
+S03,Cheesy Hungarian Sandwich,70.00,/org/example/angelsburgerpos/images/Cheesy Hungarian Sandwich.jpg,Sandwich,100
+S04,Ham Sandwich,18.00,/org/example/angelsburgerpos/images/Ham Sandwich.jpg,Sandwich,100
+S05,Ham & Cheese Sandwich,23.00,/org/example/angelsburgerpos/images/Ham & Cheese Sandwich.jpg,Sandwich,100
+S06,Ham & Egg Sandwich,30.00,/org/example/angelsburgerpos/images/Ham & Egg Sandwich.jpg,Sandwich,100
+S07,Ham Cheese & Egg Sandwich,35.00,/org/example/angelsburgerpos/images/Ham Cheese & Egg Sandwich.jpg,Sandwich,100
+S08,Bacon Sandwich,25.00,/org/example/angelsburgerpos/images/Bacon Sandwich.jpg,Sandwich,100
+S09,Bacon & Cheese Sandwich,30.00,/org/example/angelsburgerpos/images/Bacon & Cheese Sandwich.jpg,Sandwich,100
+S10,Bacon & Egg Sandwich,37.00,/org/example/angelsburgerpos/images/Bacon & Egg Sandwich.jpg,Sandwich,100
+S11,Bacon Cheese & Egg Sandwich,42.00,/org/example/angelsburgerpos/images/Bacon, Cheese & Egg Sandwich.jpg,Sandwich,100
+S12,Egg Sandwich,20.00,/org/example/angelsburgerpos/images/Egg Sandwich.jpg,Sandwich,100
+A01,Extra Cheese,5.00,/org/example/angelsburgerpos/images/Extra Cheese.jpg,Addon,100
+A02,Extra Egg,15.00,/org/example/angelsburgerpos/images/Extra Egg.jpg,Addon,100
+A03,Extra Ham,14.00,/org/example/angelsburgerpos/images/Extra Ham.jpg,Addon,100
+A04,Extra Bacon,25.00,/org/example/angelsburgerpos/images/Extra Bacon.jpg,Addon,100
+D01,Lipton Iced Tea,35.00,/org/example/angelsburgerpos/images/Lipton Iced Tea.jpg,Drink,100
+D02,Bottled Water,15.00,/org/example/angelsburgerpos/images/Bottled Water.jpg,Drink,100
+D03,Mug (Glass),20.00,/org/example/angelsburgerpos/images/Mug.jpg,Drink,100
+D04,Mirinda (Glass),20.00,/org/example/angelsburgerpos/images/Mirinda.jpg,Drink,100
+D05,Pepsi (Glass),20.00,/org/example/angelsburgerpos/images/Pepsi.jpg,Drink,100
+D06,7-Up (Glass),20.00,/org/example/angelsburgerpos/images/7-up.jpg,Drink,100
+D07,Softdrinks (Plastic Bottle),25.00,/org/example/angelsburgerpos/images/Soft Drinks.jpg,Drink,100

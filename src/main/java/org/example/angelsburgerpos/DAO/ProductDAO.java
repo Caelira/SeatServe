@@ -21,17 +21,32 @@ public class ProductDAO {
 
         while (scanner.hasNextLine()) {
             String full = scanner.nextLine();
+            if (full.trim().isEmpty()) continue;
+
+
             String[] parts = full.split(",");
 
             if (parts.length >= 6) {
-                products.add(new Product(
-                        parts[0],
-                        parts[1],
-                        Double.parseDouble(parts[2]),
-                        parts[3].trim(),
-                        parts[4].trim(),
-                        Integer.parseInt(parts[5].trim())
-                ));
+                try {
+                    String id = parts[0].trim();
+                    String name = parts[1].trim();
+                    double price = Double.parseDouble(parts[2].trim());
+
+                    StringBuilder pathBuilder = new StringBuilder();
+                    for (int i = 3; i < parts.length - 2; i++) {
+                        pathBuilder.append(parts[i]);
+                        if (i < parts.length - 3) pathBuilder.append(",");
+                    }
+                    String imagePath = pathBuilder.toString().trim();
+
+                    String category = parts[parts.length - 2].trim();
+                    int stock = Integer.parseInt(parts[parts.length - 1].trim());
+
+                    products.add(new Product(id, name, price, imagePath, category, stock));
+
+                } catch (Exception e) {
+                    System.out.println("Skipping bad line: " + full);
+                }
             }
         }
         scanner.close();

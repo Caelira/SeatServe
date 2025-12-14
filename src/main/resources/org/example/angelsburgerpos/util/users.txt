@@ -1,0 +1,5 @@
+admin,admin123,Manager,Prince Olaguera
+cashier1,1234,Cashier,Rowena Acabado
+cashier2,1234,Cashier,James Agmata
+cashier3,1234,Cashier,Japhet Mondigo
+cashier4,1234,Cashier,Ayende

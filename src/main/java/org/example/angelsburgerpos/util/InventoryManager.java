@@ -1,5 +1,7 @@
 package org.example.angelsburgerpos.util;
 
+import javafx.fxml.FXMLLoader;
+import org.example.angelsburgerpos.controller.InventoryController;
 import org.example.angelsburgerpos.model.CartItem;
 import org.example.angelsburgerpos.model.Ingredient;
 
@@ -68,10 +70,12 @@ public class InventoryManager {
     }
 
     public static void reduceStock(List<CartItem> soldItems) {
-        if (ingredientMap.isEmpty()) initialize();
+        if (ingredientMap.isEmpty()) {
+            initialize();
+        }
 
         for (CartItem item : soldItems) {
-            String prodId = item.getProduct().getId(); // Ensure Product class has getId() returning String
+            String prodId = item.getProduct().getId();
             int qtySold = item.getQuantity();
 
             if (recipeMap.containsKey(prodId)) {
@@ -81,7 +85,9 @@ public class InventoryManager {
                     String ingId = entry.getKey();
                     int qtyPerUnit = entry.getValue();
                     int totalDeduction = qtyPerUnit * qtySold;
-
+//                    System.out.println(prodId + "item: " + item.getName() + " QTY: " + item.getTotal());
+//                    Ingredient ing = ingredientMap.get(ingId);
+//                    ing.reduceStock(item.getQuantity());
                     if (ingredientMap.containsKey(ingId)) {
                         Ingredient ing = ingredientMap.get(ingId);
                         int currentStock = ing.getStock();
@@ -90,6 +96,8 @@ public class InventoryManager {
                 }
             }
         }
+        FXMLLoader loader = new FXMLLoader(InventoryManager.class.getResource("/org/example/angelsburgerpos/controller/InventoryController.java"));
+
         saveInventory();
     }
 
@@ -98,7 +106,6 @@ public class InventoryManager {
             File file = new File(INGREDIENTS_FILE);
             PrintWriter writer = new PrintWriter(file);
 
-            // Sort by ID to keep file clean
             List<Ingredient> list = new ArrayList<>(ingredientMap.values());
             list.sort(Comparator.comparing(Ingredient::getId));
 

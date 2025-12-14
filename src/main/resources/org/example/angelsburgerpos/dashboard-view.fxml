@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
@@ -11,35 +12,31 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.angelsburgerpos.controller.DashboardController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1020.0" stylesheets="@css/style.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.angelsburgerpos.controller.DashboardController">
    <top>
-      <AnchorPane prefHeight="42.0" prefWidth="600.0" style="-fx-background-color: #eee;" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="42.0" prefWidth="600.0" styleClass="top-bar" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="nameLabel" layoutX="14.0" layoutY="13.0" text="Prince II L Olaguera" />
-            <Label fx:id="dateLabel" layoutX="146.0" layoutY="13.0" text="Date &amp; Time" />
-            <Label layoutX="509.0" layoutY="7.0" prefHeight="16.0" prefWidth="181.0" text="ANGELS BURGER">
+            <Label fx:id="nameLabel" layoutX="14.0" layoutY="13.0" text="Manager Name" />
+            <Label fx:id="dateLabel" layoutX="856.0" layoutY="13.0" text="Date &amp; Time" />
+            <Label fx:id="roleLabel" layoutX="196.0" layoutY="13.0" text="Role" textFill="#777" />
+            <Label layoutX="395.0" layoutY="7.0" styleClass="header-label" text="ANGELS BURGER">
                <font>
-                  <Font name="Bernard MT Condensed" size="22.0" />
+                  <Font size="22.0" />
                </font>
             </Label>
          </children>
       </AnchorPane>
    </top>
    <left>
-      <AnchorPane prefHeight="358.0" prefWidth="173.0" style="-fx-background-color: #333;" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="358.0" prefWidth="173.0" styleClass="sidebar" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="logoutButton" layoutX="29.0" layoutY="679.0" mnemonicParsing="false" prefHeight="29.0" prefWidth="114.0" style="-fx-background-color: #d32f2f;" text="Logout" textFill="WHITE" />
-
-            <HBox alignment="CENTER" layoutX="24.0" layoutY="44.0" prefHeight="42.0" prefWidth="125.0">
-               <children>
-                  <Label fx:id="logoLabel" text="Logo/Profile" textFill="WHITE" />
-               </children>
-            </HBox>
+            <Button fx:id="logoutButton" layoutX="29.0" layoutY="679.0" mnemonicParsing="false" onAction="#logoutClicked" prefHeight="29.0" prefWidth="114.0" style="-fx-background-color: #444;" text="Logout" textFill="WHITE" />
 
             <Button fx:id="inventoryButton" layoutX="29.0" layoutY="386.0" mnemonicParsing="false" onAction="#inventoryClicked" prefHeight="29.0" prefWidth="114.0" text="Inventory" />
             <Button fx:id="reportsButton" layoutX="29.0" layoutY="336.0" mnemonicParsing="false" onAction="#reportsClicked" prefHeight="29.0" prefWidth="114.0" text="Reports" />
-            <Button fx:id="employeesButton" layoutX="29.0" layoutY="440.0" mnemonicParsing="false" prefHeight="29.0" prefWidth="114.0" text="Employees" />
+            <Button fx:id="employeesButton" layoutX="29.0" layoutY="440.0" mnemonicParsing="false" onAction="#employeesClicked" prefHeight="29.0" prefWidth="114.0" text="Employees" />
             <Button fx:id="menuButton" layoutX="29.0" layoutY="288.0" mnemonicParsing="false" prefHeight="29.0" prefWidth="114.0" text="Menu" />
+            <ImageView fx:id="logo" fitHeight="150.0" fitWidth="150.0" layoutX="12.0" layoutY="61.0" pickOnBounds="true" preserveRatio="false" />
          </children>
       </AnchorPane>
    </left>
@@ -69,19 +66,20 @@
                      </content>
                   </ScrollPane>
 
-                  <AnchorPane prefHeight="100.0" prefWidth="1026.0" style="-fx-background-color: #ddd; -fx-border-color: #bbb; -fx-border-width: 1 0 0 0;">
+                  <AnchorPane prefHeight="100.0" prefWidth="1026.0" style="-fx-background-color: #f4f4f4; -fx-border-color: #ddd; -fx-border-width: 1 0 0 0;">
                      <children>
                         <Label layoutX="35.0" layoutY="35.0" text="Total Amount:">
                            <font>
                               <Font size="18.0" />
                            </font>
                         </Label>
-                        <Label fx:id="totalLabel" layoutX="165.0" layoutY="30.0" text="P 0.00" textFill="#d32f2f">
+                        <Label fx:id="totalLabel" layoutX="165.0" layoutY="30.0" styleClass="total-label" text="P 0.00">
                            <font>
                               <Font name="System Bold" size="24.0" />
                            </font>
                         </Label>
-                        <Button fx:id="viewCartButton" layoutX="800.0" layoutY="25.0" mnemonicParsing="false" onAction="#viewCartClicked" prefHeight="50.0" prefWidth="180.0" style="-fx-background-color: #FF9800; -fx-text-fill: white;" text="VIEW CART (0)">
+
+                        <Button fx:id="viewCartButton" layoutX="620.0" layoutY="24.0" mnemonicParsing="false" onAction="#viewCartClicked" prefHeight="50.0" prefWidth="180.0" styleClass="action-button" text="VIEW CART (0)">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>

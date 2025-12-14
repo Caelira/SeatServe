@@ -45,17 +45,13 @@ public class CheckoutController {
 
             double change = cash - totalAmount;
 
-            // 1. Generate Receipt
             Receipt receipt = new Receipt(cartItems, totalAmount, cash, change);
             receipt.saveToFile();
 
-            // 2. Log Sale
             SalesLogger.logSale(totalAmount);
 
-            // 3. Deduct Inventory (NEW)
             InventoryManager.reduceStock(cartItems);
 
-            // 4. Show Receipt & Close
             openReceiptWindow(receipt.getContent());
             closeWindow();
 

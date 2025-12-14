@@ -4,6 +4,8 @@ module org.example.angelsburgerpos {
 
     requires com.dlsc.formsfx;
     requires java.desktop;
+    requires io.javalin;
+    requires com.google.gson;
 
     opens org.example.angelsburgerpos.model to javafx.base;
 
