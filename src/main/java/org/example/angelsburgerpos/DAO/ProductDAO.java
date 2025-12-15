@@ -8,6 +8,14 @@ import java.util.Scanner;
 
 public class ProductDAO {
 
+    public Product findById(String id){
+        for(Product p : this.getAllProducts()){
+            if(p.getId().equals(id)){
+                return p;
+            }
+        }
+        return null;
+    }
     public List<Product> getAllProducts() {
         List<Product> products = new ArrayList<>();
         InputStream is = getClass().getResourceAsStream("/org/example/angelsburgerpos/util/product-database.txt");

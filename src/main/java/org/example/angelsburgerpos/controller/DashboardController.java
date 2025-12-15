@@ -70,6 +70,10 @@ public class DashboardController implements Initializable {
     private ProductService productService;
     private ObservableList<CartItem> cartList = FXCollections.observableArrayList();
     private MyListener myListener;
+    private ObservableList<MobileOrder> pendingOrders = FXCollections.observableArrayList();
+
+
+
     private User user;
     public DashboardController() {
         productService = new ProductServiceImp();
@@ -87,6 +91,7 @@ public class DashboardController implements Initializable {
         loadProducts("Burger");
         initClock();
         startKioskServer();
+        updateMobileOrderNotification();
     }
     private void startKioskServer(){
         try{
@@ -96,10 +101,81 @@ public class DashboardController implements Initializable {
             System.out.println("Failed to start server. Error: " + e.getMessage());
         }
     }
+    public List<MobileOrder> getPendingOrders(){
+        return pendingOrders;
+    }
+    @FXML
+    private Button mobileOrdersButton;
 
-    private ObservableList<MobileOrder> pendingOrders = FXCollections.observableArrayList();
+    public void addPendingOrder(MobileOrder order){
+        pendingOrders.add(order);
+        updateMobileOrderNotification();
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Order received");
+        alert.setHeaderText(null);
+        alert.setContentText("New order from" + order.getCustomerName());
+        alert.show();
+    }
 
+    private void updateMobileOrderNotification(){
+        if(mobileOrdersButton != null){
+            mobileOrdersButton.setText("Orders: " + pendingOrders.size());
+            if(!pendingOrders.isEmpty()){
+                mobileOrdersButton.setStyle("-fx-background-color: #ff9800; -fx-text-fill: white;");
+            }else{
+                mobileOrdersButton.setStyle("");
+            }
+        }
+    }
+    @FXML
+    private void openMobileQueue(){
+        try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/mobile-queue-view.fxml"));
+            Parent root = loader.load();
 
+            MobileOrdersController controller = loader.getController();
+            controller.setOrderList(pendingOrders);
+
+            Stage stage = new Stage();
+            stage.setTitle("Order Queue");
+            stage.setScene(new Scene(root));
+            stage.show();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    @FXML
+    private void viewMobileOrdersClicked(){
+        try{
+            FXMLLoader loader = new FXMLLoader((getClass().getResource("/org/example/angelsburgerpos/mobile-orders-view.fxml")));
+            Parent root = loader.load();
+
+            MobileOrdersController controller = loader.getController();
+           // controller.setDashboard(this);
+            controller.setOrderList(pendingOrders);
+
+            Stage stage = new Stage();
+            stage.setTitle("Mobile orders");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    //accept an order called from the mobileordercontroller
+    public void acceptMobileOrder(MobileOrder order) {
+        for (OrderRequest req : order.getItems()) {
+            Product product = findyById(req.productId);
+            if (product != null) {
+                for(int i=0; i<req.quantity; i++) {
+                    addToCart(product);
+                }
+            }
+        }
+        pendingOrders.remove(order);
+        updateMobileOrderNotification();
+    }
     public void handleMobileOrder(List<OrderRequest> mobileOrders){
         System.out.println("Received");
         for(OrderRequest req : mobileOrders){
@@ -111,11 +187,7 @@ public class DashboardController implements Initializable {
                 }
             }
         }
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Order received");
-        alert.setHeaderText(null);
-        alert.setContentText("Items added to cart");
-        alert.show();
+
     }
     private Product findyById(String id){
         for(Product p : productService.getProducts()){

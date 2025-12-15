@@ -35,8 +35,9 @@
             <Button fx:id="inventoryButton" layoutX="29.0" layoutY="386.0" mnemonicParsing="false" onAction="#inventoryClicked" prefHeight="29.0" prefWidth="114.0" text="Inventory" />
             <Button fx:id="reportsButton" layoutX="29.0" layoutY="336.0" mnemonicParsing="false" onAction="#reportsClicked" prefHeight="29.0" prefWidth="114.0" text="Reports" />
             <Button fx:id="employeesButton" layoutX="29.0" layoutY="440.0" mnemonicParsing="false" onAction="#employeesClicked" prefHeight="29.0" prefWidth="114.0" text="Employees" />
-            <Button fx:id="menuButton" layoutX="29.0" layoutY="288.0" mnemonicParsing="false" prefHeight="29.0" prefWidth="114.0" text="Menu" />
+            <Button fx:id="menuButton" layoutX="29.0" layoutY="288.0" mnemonicParsing="false" prefHeight="29.0" prefWidth="114.0" text="Manual Order" />
             <ImageView fx:id="logo" fitHeight="150.0" fitWidth="150.0" layoutX="12.0" layoutY="61.0" pickOnBounds="true" preserveRatio="false" />
+            <Button fx:id="mobileOrdersButton" layoutX="30.0" layoutY="245.0" mnemonicParsing="false" onAction="#viewMobileOrdersClicked" prefHeight="29.0" prefWidth="114.0" text="Mobile Orders" />
          </children>
       </AnchorPane>
    </left>

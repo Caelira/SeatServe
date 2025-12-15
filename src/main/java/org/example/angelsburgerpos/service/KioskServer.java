@@ -1,6 +1,7 @@
 package org.example.angelsburgerpos.service;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
@@ -26,23 +27,51 @@ public class KioskServer {
 
     public void startServer() {
         app = Javalin.create(config -> {
-            config.staticFiles.add("/webapp", Location.CLASSPATH);
-        }).start(8080);
+            config.staticFiles.add("webapp", Location.CLASSPATH);
+        }).start(5050); //5050 makapasa HAHAHAHAAHAH
 
         app.get("/api/menu", ctx -> {
-            ctx.json(productService.getProducts());
+            List<Product> products = productService.getProducts();
+            String jsonResponse = gson.toJson(products); // Use Gson manually
+            ctx.result(jsonResponse).contentType("application/json");
         });
         app.post("/api/order", ctx -> {
             String body = ctx.body();
-            List<OrderRequest> items = gson.fromJson(body, new TypeToken<List<OrderRequest>>(){}.getType());
+            try {
+                List<OrderRequest> items = gson.fromJson(body, new TypeToken<List<OrderRequest>>(){}.getType());
 
-            MobileOrder newOrder = new MobileOrder("Mobile Customer", items);
+                if(items != null && !items.isEmpty()){
+                    MobileOrder order = new MobileOrder("Customer", items);
+                    Platform.runLater(() -> {
+                        dashboard.addPendingOrder(order);
+                    });
 
-            Platform.runLater(() -> {
-             //   dashboard.addPendingOrder(newOrder);
-            });
+                    String jsonResponse = gson.toJson(order.getOrderId());
+                    ctx.status(201).result(jsonResponse).contentType("application/json");
+                }else{
+                    ctx.status(400).result("Empty order");
+                }
+            } catch (JsonSyntaxException e) {
+                System.out.println("Error: " +  e.getMessage());
+                ctx.status(400).result("Error processing order. Please try again.");
+            }
 
-            ctx.status(201).result("Order Sent to Cashier");
+
+        });
+
+        app.get("/api/order/{id}/status", ctx -> {
+            String id = ctx.pathParam("id");
+            String status = "PENDING";
+
+            if(dashboard.getPendingOrders() != null){
+                for(MobileOrder o : dashboard.getPendingOrders()){
+                    if(o.getOrderId().equals(id)){
+                        status = o.getStatus();
+                        break;
+                    }
+                }
+            }
+            ctx.result(status);
         });
     }
         public void stop () {

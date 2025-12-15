@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angels Burger Menu</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { color: #d32f2f; margin: 0; }
+        .card { background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; }
+        .card img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; margin-right: 15px; background: #ddd; }
+        .info { flex-grow: 1; }
+        .info h3 { margin: 0 0 5px; font-size: 16px; }
+        .price { color: #2e7d32; font-weight: bold; }
+        .add-btn { background: #d32f2f; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+
+        /* Floating Cart Button */
+        .cart-btn { position: fixed; bottom: 20px; right: 20px; background: #FF9800; color: white; padding: 15px 20px; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-weight: bold; text-decoration: none; display: flex; justify-content: space-between; width: 120px; }
+
+        /* Checkout Modal */
+        #checkoutModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background: white; width: 90%; max-width: 400px; padding: 20px; border-radius: 10px; }
+        .modal-footer { margin-top: 15px; display: flex; gap: 10px; }
+        .full-btn { width: 100%; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .cancel { background: #ccc; }
+        .confirm { background: #2e7d32; color: white; }
+
+        /* Status Screen */
+        #statusScreen { display: none; text-align: center; margin-top: 50px; }
+        .status-badge { display: inline-block; padding: 10px 20px; background: #ddd; border-radius: 20px; margin-top: 20px; font-weight: bold; }
+        .accepted { background: #c8e6c9; color: #2e7d32; }
+    </style>
+</head>
+<body>
+
+<div id="menuScreen">
+    <div class="header">
+        <h1>ANGELS BURGER</h1>
+        <p>Select your order</p>
+    </div>
+
+    <div id="productList">Loading menu...</div>
+    <br><br><br> <div class="cart-btn" onclick="openCheckout()">
+    <span>Cart</span>
+    <span id="cartCount">0</span>
+</div>
+</div>
+
+<div id="checkoutModal">
+    <div class="modal-content">
+        <h2>Your Order</h2>
+        <ul id="cartItemsList" style="padding-left: 20px; margin-bottom: 20px;"></ul>
+
+        <label>Your Name:</label>
+        <input type="text" id="customerName" placeholder="Enter name" style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
+
+        <div class="modal-footer">
+            <button class="full-btn cancel" onclick="closeCheckout()">Cancel</button>
+            <button class="full-btn confirm" onclick="submitOrder()">SEND ORDER</button>
+        </div>
+    </div>
+</div>
+
+<div id="statusScreen">
+    <h1 style="color: #2e7d32;">Order Sent!</h1>
+    <p>Please wait for the cashier to accept.</p>
+    <div id="statusBadge" class="status-badge">PENDING</div>
+    <p style="margin-top: 30px; font-size: 14px; color: #666;">Order ID: <span id="displayOrderId">...</span></p>
+</div>
+
+<script>
+    let cart = [];
+    let currentOrderId = null;
+    fetch('/api/menu')
+        .then(res => res.json())
+        .then(products => {
+            const list = document.getElementById('productList');
+            list.innerHTML = '';
+            products.forEach(p => {
+                list.innerHTML += `
+                        <div class="card">
+                            <div style="width:60px; height:60px; background:#ddd; border-radius:5px; margin-right:15px;"></div>
+                            <div class="info">
+                                <h3>${p.name}</h3>
+                                <div class="price">P ${p.price}</div>
+                            </div>
+                            <button class="add-btn" onclick="addToCart('${p.id}', '${p.name}')">ADD</button>
+                        </div>
+                    `;
+            });
+        })
+        .catch(err => alert("Error loading menu. Check PC connection."));
+
+    function addToCart(id, name) {
+        let existing = cart.find(i => i.productId === id);
+        if (existing) { existing.quantity++; }
+        else { cart.push({ productId: id, name: name, quantity: 1 }); }
+        updateCartCount();
+    }
+
+    function updateCartCount() {
+        const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+        document.getElementById('cartCount').innerText = count;
+    }
+
+    function openCheckout() {
+        if(cart.length === 0) return alert("Cart is empty!");
+        const list = document.getElementById('cartItemsList');
+        list.innerHTML = '';
+        cart.forEach(item => {
+            list.innerHTML += `<li>${item.name} x${item.quantity}</li>`;
+        });
+        document.getElementById('checkoutModal').style.display = 'flex';
+    }
+
+    function closeCheckout() {
+        document.getElementById('checkoutModal').style.display = 'none';
+    }
+
+    function submitOrder() {
+        const name = document.getElementById('customerName').value;
+        if(!name) return alert("Please enter your name");
+
+        fetch('/api/order', {
+            method: 'POST',
+            body: JSON.stringify(cart)
+        })
+            .then(res => {
+                if(res.ok) {
+                    return res.json();
+                }
+                throw new Error("Failed");
+            })
+            .then(orderId => {
+                currentOrderId = orderId;
+                closeCheckout();
+                showStatusScreen(orderId);
+            })
+            .catch(err => alert("Failed to send order. Try again."));
+    }
+
+    function showStatusScreen(orderId) {
+        document.getElementById('menuScreen').style.display = 'none';
+        document.getElementById('statusScreen').style.display = 'block';
+        document.getElementById('displayOrderId').innerText = orderId;
+
+        const interval = setInterval(() => {
+            fetch(`/api/order/${orderId}/status`)
+                .then(res => res.text())
+                .then(status => {
+                    const badge = document.getElementById('statusBadge');
+                    badge.innerText = status;
+
+                    if (status === "ACCEPTED") {
+                        badge.classList.add("accepted");
+                        badge.innerText = "ORDER ACCEPTED!";
+                        clearInterval(interval);
+                    }
+                });
+        }, 2000);
+    }
+</script>
+</body>
+</html>

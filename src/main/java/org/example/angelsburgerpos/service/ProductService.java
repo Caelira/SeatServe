@@ -13,4 +13,5 @@ public interface ProductService {
     public String editProduct(Product product);
     public String updateProduct(Product product);
     public String storeProducts(ArrayList<Product> products);
+    public Product findById(String id);
 }

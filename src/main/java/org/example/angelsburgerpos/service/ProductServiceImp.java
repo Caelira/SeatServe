@@ -33,4 +33,10 @@ public class ProductServiceImp implements ProductService{
     public String storeProducts(ArrayList<Product> products) {
         return "";
     }
+
+    @Override
+    public Product findById(String id) {
+        Product product = dao.findById(id);
+        return  product;
+    }
 }
