@@ -43,15 +43,10 @@
                                         <Font name="System Bold" size="20.0" />
                                     </font>
                                 </Label>
-                                <Label text="- Click 'NOTIFY' when food is ready" textFill="#2e7d32">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </Label>
                             </children>
                         </HBox>
 
-                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: #FFFFFF; -fx-background: transparent;" VBox.vgrow="ALWAYS">
                             <content>
                                 <FlowPane fx:id="acceptedContainer" hgap="20.0" vgap="20.0">
                                     <padding>
