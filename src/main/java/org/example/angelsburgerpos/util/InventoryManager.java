@@ -100,7 +100,33 @@ public class InventoryManager {
 
         saveInventory();
     }
+    public static boolean canMakeProduct(String productId, int quantity){
+        if(ingredientMap.isEmpty()){
+            initialize();
+        }
 
+        if(recipeMap.containsKey(productId)){
+            Map<String, Integer> requiredIngredients = recipeMap.get(productId);
+
+            for(Map.Entry<String, Integer> entry : requiredIngredients.entrySet()){
+                String ingId = entry.getKey();
+                int qtyPerUnit = entry.getValue();
+                int totalRequired = qtyPerUnit * quantity;
+
+                if(ingredientMap.containsKey(ingId)){
+                    Ingredient ing = ingredientMap.get(ingId);
+                    if(ing.getStock() < totalRequired){
+                        return false;
+                    }
+                }else{
+                    System.out.println("Missing ingredients");
+                    return false;
+                }
+            }
+
+        }
+        return true;
+    }
     private static void saveInventory() {
         try {
             File file = new File(INGREDIENTS_FILE);

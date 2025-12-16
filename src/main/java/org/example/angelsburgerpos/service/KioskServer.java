@@ -9,9 +9,13 @@ import javafx.application.Platform;
 import org.example.angelsburgerpos.controller.DashboardController;
 import org.example.angelsburgerpos.model.MobileOrder;
 import org.example.angelsburgerpos.model.Product;
+import org.example.angelsburgerpos.util.InventoryManager;
 import org.example.angelsburgerpos.util.OrderRequest;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class KioskServer {
 
@@ -19,20 +23,37 @@ public class KioskServer {
     private final DashboardController dashboard;
     private final Gson gson = new Gson();
     private Javalin app;
-
+    private static int orderCounter = 1;
     public KioskServer(ProductService productService, DashboardController dashboard) {
         this.productService = productService;
         this.dashboard = dashboard;
     }
 
+    private boolean checkAvailability(Product p){
+        return InventoryManager.canMakeProduct(p.getId(), 1);
+    }
     public void startServer() {
         app = Javalin.create(config -> {
             config.staticFiles.add("webapp", Location.CLASSPATH);
         }).start(5050); //5050 makapasa HAHAHAHAAHAH
 
         app.get("/api/menu", ctx -> {
-            List<Product> products = productService.getProducts();
-            String jsonResponse = gson.toJson(products); // Use Gson manually
+            List<Product> allProducts = productService.getProducts();
+
+            List<Map<String, Object>> menuResponse = new ArrayList<>();
+
+            for(Product p : allProducts){
+                boolean available = checkAvailability(p);
+
+                menuResponse.add(Map.of(
+                        "id", p.getId(),
+                        "name", p.getName(),
+                        "price", p.getPrice(),
+                        "available", available
+                ));
+
+            }
+            String jsonResponse = gson.toJson(menuResponse);
             ctx.result(jsonResponse).contentType("application/json");
         });
         app.post("/api/order", ctx -> {
@@ -40,17 +61,16 @@ public class KioskServer {
             try {
                 List<OrderRequest> items = gson.fromJson(body, new TypeToken<List<OrderRequest>>(){}.getType());
 
-                if(items != null && !items.isEmpty()){
-                    MobileOrder order = new MobileOrder("Customer", items);
-                    Platform.runLater(() -> {
-                        dashboard.addPendingOrder(order);
-                    });
+                String shortId = String.format("%03d", orderCounter++);
 
-                    String jsonResponse = gson.toJson(order.getOrderId());
-                    ctx.status(201).result(jsonResponse).contentType("application/json");
-                }else{
-                    ctx.status(400).result("Empty order");
-                }
+                MobileOrder order = new MobileOrder("Customer #" + shortId, items);
+                order.setOrderId(shortId);
+                order.setStatus("PENDING_PAYMENT");
+
+                Platform.runLater(() -> dashboard.addPendingOrder(order));
+                String jsonResponse = gson.toJson(order.getOrderId());
+                ctx.status(201).result(jsonResponse).contentType("application/json");
+
             } catch (JsonSyntaxException e) {
                 System.out.println("Error: " +  e.getMessage());
                 ctx.status(400).result("Error processing order. Please try again.");

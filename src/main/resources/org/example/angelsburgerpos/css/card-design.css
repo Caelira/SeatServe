@@ -2,3 +2,7 @@
 
     -fx-border-radius: 20px black;
 }
+
+.productCard{
+    -fx-border-color: 1px solid black;
+}

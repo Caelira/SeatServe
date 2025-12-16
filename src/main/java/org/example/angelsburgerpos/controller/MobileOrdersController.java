@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import org.example.angelsburgerpos.model.MobileOrder;
 
@@ -15,8 +16,8 @@ import java.util.ResourceBundle;
 
 public class MobileOrdersController implements Initializable {
 
-    @FXML private FlowPane pendingContainer;
-    @FXML private FlowPane acceptedContainer;
+    @FXML private FlowPane acceptedContainer; // Only one container now
+    @FXML private TextField codeField;
 
     private ObservableList<MobileOrder> orderList;
 
@@ -27,43 +28,64 @@ public class MobileOrdersController implements Initializable {
         this.orderList = orderList;
         refreshQueue();
         orderList.addListener((ListChangeListener<MobileOrder>) change -> {
-            while (change.next()) {
-                refreshQueue();
-            }
+            while (change.next()) refreshQueue();
         });
     }
 
     private void refreshQueue() {
-        pendingContainer.getChildren().clear();
         acceptedContainer.getChildren().clear();
 
         for (MobileOrder order : orderList) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/order-card-view.fxml"));
-                Parent cardNode = loader.load();
-
-                OrderCardController cardController = loader.getController();
-                cardController.setData(order, this);
-
-                if ("ACCEPTED".equals(order.getStatus())) {
+            if ("PREPARING".equals(order.getStatus())) {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/order-card-view.fxml"));
+                    Parent cardNode = loader.load();
+                    OrderCardController cardController = loader.getController();
+                    cardController.setData(order, this);
                     acceptedContainer.getChildren().add(cardNode);
-
-                } else {
-                    pendingContainer.getChildren().add(cardNode);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
     }
 
-    public void acceptOrder(MobileOrder order) {
-        order.setStatus("ACCEPTED");
-        refreshQueue();
+    @FXML
+    private void confirmPayment() {
+        String code = codeField.getText().trim();
+        if (code.isEmpty()) return;
+
+        boolean found = false;
+        for (MobileOrder order : orderList) {
+            // Match the code
+            if (order.getOrderId().equals(code)) {
+                if ("PENDING_PAYMENT".equals(order.getStatus())) {
+                    order.setStatus("PREPARING");
+                    refreshQueue();
+                    codeField.clear();
+                    found = true;
+                    return;
+                }
+            }
+        }
+        if (!found) {
+            System.out.println("Code not found or already paid: " + code);
+        }
     }
 
-    public void declineOrder(MobileOrder order) {
+    public void markAsReady(MobileOrder order) {
+        order.setStatus("READY");
         orderList.remove(order);
+        refreshQueue();
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(300000); // 5 minutes waits
+                orderList.remove(order);
+                System.out.println("Order #" + order.getOrderId() + " auto-deleted from memory.");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 }

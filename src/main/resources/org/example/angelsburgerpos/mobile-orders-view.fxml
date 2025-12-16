@@ -1,70 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
 <AnchorPane prefHeight="700.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.angelsburgerpos.controller.MobileOrdersController">
     <children>
-        <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-            <items>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #fff3e0;">
-                    <children>
-                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <children>
-                                <Label text="PENDING ORDERS (ACTION NEEDED)" textFill="#e65100">
-                                    <font>
-                                        <Font name="System Bold" size="18.0" />
-                                    </font>
-                                    <VBox.margin>
-                                        <Insets left="15.0" top="10.0" />
-                                    </VBox.margin>
-                                </Label>
-                                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-                                    <content>
-                                        <FlowPane fx:id="pendingContainer" hgap="15.0" vgap="15.0">
-                                            <padding>
-                                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                            </padding>
-                                        </FlowPane>
-                                    </content>
-                                </ScrollPane>
-                            </children>
-                        </VBox>
-                    </children>
-                </AnchorPane>
+        <VBox spacing="0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
 
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #e8f5e9;">
+                <HBox alignment="CENTER" spacing="15.0" style="-fx-background-color: #333; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 0, 0, 0, 5); z-index: 10;">
                     <children>
-                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <children>
-                                <Label text="ACCEPTED / PREPARING" textFill="#2e7d32">
-                                    <font>
-                                        <Font name="System Bold" size="18.0" />
-                                    </font>
-                                    <VBox.margin>
-                                        <Insets left="15.0" top="10.0" />
-                                    </VBox.margin>
-                                </Label>
-                                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-                                    <content>
-                                        <FlowPane fx:id="acceptedContainer" hgap="15.0" vgap="15.0">
-                                            <padding>
-                                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                            </padding>
-                                        </FlowPane>
-                                    </content>
-                                </ScrollPane>
-                            </children>
-                        </VBox>
+                        <Label text="ENTER CUSTOMER CODE:" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="18.0" />
+                            </font>
+                        </Label>
+
+                        <TextField fx:id="codeField" onAction="#confirmPayment" prefHeight="45.0" prefWidth="250.0" promptText="e.g. 101" style="-fx-font-size: 20px; -fx-background-radius: 5; -fx-font-weight: bold;" />
+
+                        <Button mnemonicParsing="false" onAction="#confirmPayment" prefHeight="45.0" prefWidth="180.0" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;" text="CONFIRM PAYMENT">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Button>
                     </children>
-                </AnchorPane>
-            </items>
-        </SplitPane>
+                </HBox>
+
+                <VBox style="-fx-background-color: #e8f5e9;" VBox.vgrow="ALWAYS">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 15;">
+                            <children>
+                                <Label text="KITCHEN QUEUE (PAID ORDERS)" textFill="#1b5e20">
+                                    <font>
+                                        <Font name="System Bold" size="20.0" />
+                                    </font>
+                                </Label>
+                                <Label text="- Click 'NOTIFY' when food is ready" textFill="#2e7d32">
+                                    <font>
+                                        <Font size="14.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                            <content>
+                                <FlowPane fx:id="acceptedContainer" hgap="20.0" vgap="20.0">
+                                    <padding>
+                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                    </padding>
+                                </FlowPane>
+                            </content>
+                        </ScrollPane>
+                    </children>
+                </VBox>
+
+            </children>
+        </VBox>
     </children>
 </AnchorPane>

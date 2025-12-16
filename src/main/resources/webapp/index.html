@@ -3,162 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Angels Burger Menu</title>
-    <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { color: #d32f2f; margin: 0; }
-        .card { background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; }
-        .card img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; margin-right: 15px; background: #ddd; }
-        .info { flex-grow: 1; }
-        .info h3 { margin: 0 0 5px; font-size: 16px; }
-        .price { color: #2e7d32; font-weight: bold; }
-        .add-btn { background: #d32f2f; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-
-        /* Floating Cart Button */
-        .cart-btn { position: fixed; bottom: 20px; right: 20px; background: #FF9800; color: white; padding: 15px 20px; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-weight: bold; text-decoration: none; display: flex; justify-content: space-between; width: 120px; }
-
-        /* Checkout Modal */
-        #checkoutModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-content { background: white; width: 90%; max-width: 400px; padding: 20px; border-radius: 10px; }
-        .modal-footer { margin-top: 15px; display: flex; gap: 10px; }
-        .full-btn { width: 100%; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .cancel { background: #ccc; }
-        .confirm { background: #2e7d32; color: white; }
-
-        /* Status Screen */
-        #statusScreen { display: none; text-align: center; margin-top: 50px; }
-        .status-badge { display: inline-block; padding: 10px 20px; background: #ddd; border-radius: 20px; margin-top: 20px; font-weight: bold; }
-        .accepted { background: #c8e6c9; color: #2e7d32; }
-    </style>
+    <title>Angels Burger Buzzer</title>
+    <link href="card-style-design.css" rel="stylesheet">
 </head>
 <body>
 
-<div id="menuScreen">
-    <div class="header">
-        <h1>ANGELS BURGER</h1>
-        <p>Select your order</p>
-    </div>
-
-    <div id="productList">Loading menu...</div>
-    <br><br><br> <div class="cart-btn" onclick="openCheckout()">
-    <span>Cart</span>
-    <span id="cartCount">0</span>
-</div>
+<div id="menuView">
+    <div class="header"><h1>ANGELS BURGER</h1><p>Order & Wait</p></div>
+    <div id="productList">Loading...</div>
+    <div class="cart-btn" onclick="submitOrder()">PAY & ORDER (<span id="cartCount">0</span>)</div>
 </div>
 
-<div id="checkoutModal">
-    <div class="modal-content">
-        <h2>Your Order</h2>
-        <ul id="cartItemsList" style="padding-left: 20px; margin-bottom: 20px;"></ul>
-
-        <label>Your Name:</label>
-        <input type="text" id="customerName" placeholder="Enter name" style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
-
-        <div class="modal-footer">
-            <button class="full-btn cancel" onclick="closeCheckout()">Cancel</button>
-            <button class="full-btn confirm" onclick="submitOrder()">SEND ORDER</button>
-        </div>
+<div id="paymentView" class="hidden">
+    <div id="paymentScreen">
+        <p class="instruction">Show this code to the Cashier:</p>
+        <span id="orderCode" class="big-code">----</span>
+        <p style="color: #e65100; font-weight: bold;">Waiting for payment confirmation...</p>
     </div>
 </div>
 
-<div id="statusScreen">
-    <h1 style="color: #2e7d32;">Order Sent!</h1>
-    <p>Please wait for the cashier to accept.</p>
-    <div id="statusBadge" class="status-badge">PENDING</div>
-    <p style="margin-top: 30px; font-size: 14px; color: #666;">Order ID: <span id="displayOrderId">...</span></p>
+<div id="preparingView" class="hidden">
+    <div class="spinner">🍔</div>
+    <h2>Payment Confirmed!</h2>
+    <p>Please take a seat.</p>
+    <p>We will buzz this phone when ready.</p>
+</div>
+
+<div id="alarmView" class="hidden">
+    <div id="alarmScreen">
+        <div class="alarm-msg">ORDER READY!</div>
+        <div style="font-size: 80px;">🔔</div>
+        <button class="stop-btn" onclick="stopAlarm()">I'M COMING!</button>
+    </div>
 </div>
 
 <script>
     let cart = [];
-    let currentOrderId = null;
-    fetch('/api/menu')
-        .then(res => res.json())
-        .then(products => {
-            const list = document.getElementById('productList');
-            list.innerHTML = '';
-            products.forEach(p => {
-                list.innerHTML += `
-                        <div class="card">
-                            <div style="width:60px; height:60px; background:#ddd; border-radius:5px; margin-right:15px;"></div>
-                            <div class="info">
-                                <h3>${p.name}</h3>
-                                <div class="price">P ${p.price}</div>
-                            </div>
-                            <button class="add-btn" onclick="addToCart('${p.id}', '${p.name}')">ADD</button>
-                        </div>
-                    `;
-            });
-        })
-        .catch(err => alert("Error loading menu. Check PC connection."));
+    let orderId = localStorage.getItem('angels_order_id');
+    let alarmInterval = null;
 
-    function addToCart(id, name) {
-        let existing = cart.find(i => i.productId === id);
-        if (existing) { existing.quantity++; }
-        else { cart.push({ productId: id, name: name, quantity: 1 }); }
-        updateCartCount();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    window.onload = function() {
+        if (orderId) {
+            checkStatusOnce(orderId);
+        }
+    };
+
+    function unlockAudio() {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        const buffer = audioCtx.createBuffer(1, 1, 22050);
+        const source = audioCtx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioCtx.destination);
+        source.start(0);
     }
 
-    function updateCartCount() {
-        const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-        document.getElementById('cartCount').innerText = count;
+    function playBeep() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.5);
     }
 
-    function openCheckout() {
-        if(cart.length === 0) return alert("Cart is empty!");
-        const list = document.getElementById('cartItemsList');
+    fetch('/api/menu').then(r => r.json()).then(products => {
+        const list = document.getElementById('productList');
         list.innerHTML = '';
-        cart.forEach(item => {
-            list.innerHTML += `<li>${item.name} x${item.quantity}</li>`;
-        });
-        document.getElementById('checkoutModal').style.display = 'flex';
-    }
 
-    function closeCheckout() {
-        document.getElementById('checkoutModal').style.display = 'none';
+        if (products.length === 0) {
+            list.innerHTML = '<p>No items found.</p>';
+            return;
+        }
+
+        products.forEach(p => {
+            const disabledState = p.available ? '' : 'disabled';
+            const btnText = p.available ? 'ADD' : 'SOLD OUT';
+            const btnColor = p.available ? '#d32f2f' : '#9e9e9e';
+            const opacity = p.available ? '1' : '0.6';
+
+            list.innerHTML += `
+                    <div class="card" style="opacity: ${opacity};">
+                        <div class="info">
+                            <h3>${p.name}</h3><div class="price">P ${p.price}</div>
+                        </div>
+                        <button class="add-btn"
+                                onclick="addToCart('${p.id}')"
+                                style="background-color: ${btnColor};"
+                                ${disabledState}>
+                            ${btnText}
+                        </button>
+                    </div>`;
+        });
+    }).catch(err => {
+        document.getElementById('productList').innerHTML = '<p style="color:red">Connection Error. Check Wi-Fi.</p>';
+    });
+
+    function addToCart(id) {
+        cart.push({ productId: id, quantity: 1 });
+        document.getElementById('cartCount').innerText = cart.length;
     }
 
     function submitOrder() {
-        const name = document.getElementById('customerName').value;
-        if(!name) return alert("Please enter your name");
+        if(cart.length === 0) return alert("Empty Cart!");
 
-        fetch('/api/order', {
-            method: 'POST',
-            body: JSON.stringify(cart)
-        })
-            .then(res => {
-                if(res.ok) {
-                    return res.json();
-                }
-                throw new Error("Failed");
-            })
-            .then(orderId => {
-                currentOrderId = orderId;
-                closeCheckout();
-                showStatusScreen(orderId);
-            })
-            .catch(err => alert("Failed to send order. Try again."));
+        unlockAudio();
+
+        fetch('/api/order', { method: 'POST', body: JSON.stringify(cart) })
+            .then(r => r.json())
+            .then(id => {
+                orderId = id;
+                localStorage.setItem('angels_order_id', id);
+                document.getElementById('orderCode').innerText = id;
+                showView('paymentView');
+                startPolling();
+            });
     }
 
-    function showStatusScreen(orderId) {
-        document.getElementById('menuScreen').style.display = 'none';
-        document.getElementById('statusScreen').style.display = 'block';
-        document.getElementById('displayOrderId').innerText = orderId;
+    function checkStatusOnce(id) {
+        fetch(`/api/order/${id}/status`)
+            .then(r => r.text())
+            .then(status => {
+                document.getElementById('orderCode').innerText = id;
 
-        const interval = setInterval(() => {
-            fetch(`/api/order/${orderId}/status`)
-                .then(res => res.text())
-                .then(status => {
-                    const badge = document.getElementById('statusBadge');
-                    badge.innerText = status;
+                if (status === 'PENDING_PAYMENT') {
+                    showView('paymentView');
+                    startPolling();
+                } else if (status === 'PREPARING') {
+                    showView('preparingView');
+                    startPolling();
+                } else if (status === 'READY') {
+                    triggerAlarm();
+                } else {
+                    localStorage.removeItem('angels_order_id');
+                    orderId = null;
+                    showView('menuView');
+                }
+            })
+            .catch(() => {});
+    }
 
-                    if (status === "ACCEPTED") {
-                        badge.classList.add("accepted");
-                        badge.innerText = "ORDER ACCEPTED!";
-                        clearInterval(interval);
-                    }
-                });
+    function startPolling() {
+        const poll = setInterval(() => {
+            if (!orderId) {
+                clearInterval(poll);
+                return;
+            }
+
+            fetch(`/api/order/${orderId}/status`).then(r => r.text()).then(status => {
+                if (status === 'PREPARING') {
+                    showView('preparingView');
+                }
+                else if (status === 'READY') {
+                    clearInterval(poll);
+                    triggerAlarm();
+                }
+                else if (status === 'COMPLETED' || status === 'NOT_FOUND') {
+                    clearInterval(poll);
+                    localStorage.removeItem('angels_order_id');
+                    location.reload();
+                }
+            }).catch(err => {
+                if(err.message.includes("404")) {
+                    clearInterval(poll);
+                    localStorage.removeItem('angels_order_id');
+                    location.reload();
+                }
+            });
         }, 2000);
+    }
+
+    function triggerAlarm() {
+        showView('alarmView');
+        if (navigator.vibrate) navigator.vibrate([1000, 200, 1000, 200, 1000]);
+
+        if (alarmInterval) clearInterval(alarmInterval);
+        playBeep();
+        alarmInterval = setInterval(playBeep, 800);
+    }
+
+    function stopAlarm() {
+        clearInterval(alarmInterval);
+        if (navigator.vibrate) navigator.vibrate(0);
+        localStorage.removeItem('angels_order_id');
+        location.reload();
+    }
+
+    function showView(viewId) {
+        ['menuView', 'paymentView', 'preparingView', 'alarmView'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById(viewId).classList.remove('hidden');
     }
 </script>
 </body>

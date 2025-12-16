@@ -47,7 +47,15 @@ public class MobileOrder {
         return status;
     }
 
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
+
     public void setStatus(String status) {
         this.status = status;
+    }
+    @Override
+    public String toString(){
+        return orderId;
     }
 }

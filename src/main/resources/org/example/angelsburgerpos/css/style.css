@@ -34,7 +34,11 @@
 .action-button:hover {
     -fx-background-color: #FFB300;
 }
-
+#productCard{
+    -fx-border-color: black;
+    -fx-border-width: 1px;
+    -fx-border-style: solid;
+}
 .header-label {
     -fx-text-fill: #D32F2F;
     -fx-font-family: "Bernard MT Condensed", "Impact", sans-serif;
