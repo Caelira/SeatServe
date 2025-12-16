@@ -75,7 +75,6 @@ public class MobileOrdersController implements Initializable {
 
     public void markAsReady(MobileOrder order) {
         order.setStatus("READY");
-        orderList.remove(order);
         refreshQueue();
 
         new Thread(() -> {
