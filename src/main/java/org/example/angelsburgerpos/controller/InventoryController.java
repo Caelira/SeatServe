@@ -36,28 +36,17 @@ public class InventoryController implements Initializable {
         colUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
 
         loadIngredients();
+        org.example.angelsburgerpos.util.InventoryManager.setRefreshListener(() -> {
+            loadIngredients();
+        });
+    }
+    private void loadIngredients() {
+        ingredientList.clear();
+        ingredientList.addAll(org.example.angelsburgerpos.util.InventoryManager.getAllIngredients());
+        inventoryTable.setItems(ingredientList);
+        inventoryTable.refresh();
     }
 
-    private void loadIngredients() {
-        InputStream is = getClass().getResourceAsStream("/org/example/angelsburgerpos/util/ingredients.txt");
-        if (is != null) {
-            Scanner scanner = new Scanner(is);
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                String[] parts = line.split(",");
-                if (parts.length >= 4) {
-                    ingredientList.add(new Ingredient(
-                            parts[0],
-                            parts[1],
-                            Integer.parseInt(parts[2]),
-                            parts[3]
-                    ));
-                }
-            }
-            scanner.close();
-        }
-        inventoryTable.setItems(ingredientList);
-    }
 
     public void load(){
         loadIngredients();

@@ -17,12 +17,14 @@ public class InventoryManager {
 
     private static Map<String, Ingredient> ingredientMap = new HashMap<>();
     private static Map<String, Map<String, Integer>> recipeMap = new HashMap<>();
-
+    private static Runnable refreshListener;
     public static void initialize() {
         loadIngredients();
         loadRecipes();
     }
-
+    public static void setRefreshListener(Runnable listener) {
+        refreshListener = listener;
+    }
     private static void loadIngredients() {
         try {
             File file = new File(INGREDIENTS_FILE);
@@ -99,6 +101,18 @@ public class InventoryManager {
         FXMLLoader loader = new FXMLLoader(InventoryManager.class.getResource("/org/example/angelsburgerpos/controller/InventoryController.java"));
 
         saveInventory();
+        if (refreshListener != null) {
+            javafx.application.Platform.runLater(refreshListener);
+            System.out.println("Inventory UI refreshed automatically.");
+        }
+    }
+    public static List<Ingredient> getAllIngredients() {
+        if (ingredientMap.isEmpty()) {
+            initialize();
+        }
+        List<Ingredient> list = new ArrayList<>(ingredientMap.values());
+        list.sort(Comparator.comparing(Ingredient::getId));
+        return list;
     }
     public static boolean canMakeProduct(String productId, int quantity){
         if(ingredientMap.isEmpty()){

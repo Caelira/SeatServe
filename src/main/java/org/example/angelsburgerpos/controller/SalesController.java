@@ -53,12 +53,16 @@ public class SalesController implements Initializable {
                     String line = scanner.nextLine();
                     String[] parts = line.split(",");
                     if (parts.length == 3) {
-                        String date = parts[0];
-                        String time = parts[1];
-                        double amount = Double.parseDouble(parts[2]);
+                        try {
+                            String date = parts[0];
+                            String time = parts[1];
+                            double amount = Double.parseDouble(parts[2]);
 
-                        list.add(new SaleRecord(date, time, amount));
-                        grandTotal += amount;
+                            list.add(new SaleRecord(date, time, amount));
+                            grandTotal += amount;
+                        } catch (NumberFormatException e) {
+                            System.out.println("Skipping bad line in sales log: " + line);
+                        }
                     }
                 }
             } catch (FileNotFoundException e) {

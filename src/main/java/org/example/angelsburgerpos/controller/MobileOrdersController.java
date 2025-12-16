@@ -16,13 +16,17 @@ import java.util.ResourceBundle;
 
 public class MobileOrdersController implements Initializable {
 
-    @FXML private FlowPane acceptedContainer; // Only one container now
-    @FXML private TextField codeField;
+    @FXML
+    private FlowPane acceptedContainer; // Only one container now
+    @FXML
+    private TextField codeField;
 
     private ObservableList<MobileOrder> orderList;
+    private DashboardController dashboard;
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {}
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+    }
 
     public void setOrderList(ObservableList<MobileOrder> orderList) {
         this.orderList = orderList;
@@ -30,6 +34,10 @@ public class MobileOrdersController implements Initializable {
         orderList.addListener((ListChangeListener<MobileOrder>) change -> {
             while (change.next()) refreshQueue();
         });
+    }
+
+    public void setDashboard(DashboardController dashboard) {
+        this.dashboard = dashboard;
     }
 
     private void refreshQueue() {
@@ -55,21 +63,19 @@ public class MobileOrdersController implements Initializable {
         String code = codeField.getText().trim();
         if (code.isEmpty()) return;
 
-        boolean found = false;
         for (MobileOrder order : orderList) {
-            // Match the code
             if (order.getOrderId().equals(code)) {
                 if ("PENDING_PAYMENT".equals(order.getStatus())) {
+
+                    if (dashboard != null) {
+                        dashboard.finalizeMobileOrder(order);
+                    }
                     order.setStatus("PREPARING");
                     refreshQueue();
                     codeField.clear();
-                    found = true;
                     return;
                 }
             }
-        }
-        if (!found) {
-            System.out.println("Code not found or already paid: " + code);
         }
     }
 
@@ -79,9 +85,11 @@ public class MobileOrdersController implements Initializable {
 
         new Thread(() -> {
             try {
-                Thread.sleep(300000); // 5 minutes waits
-                orderList.remove(order);
-                System.out.println("Order #" + order.getOrderId() + " auto-deleted from memory.");
+                Thread.sleep(300000); // 5 minutes waits - collects basura
+                javafx.application.Platform.runLater(() -> {
+                    orderList.remove(order);
+                    System.out.println("Order #" + order.getOrderId() + " auto-deleted.");
+                });
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
