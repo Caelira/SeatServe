@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Angels Burger Buzzer</title>
-    <link href="card-style-design.css" rel="stylesheet">
+    <link rel="stylesheet" href="card-style-design.css">
 </head>
 <body>
 
@@ -17,6 +17,7 @@
         <button class="filter-chip" onclick="filterMenu('Sandwich', this)">Sandwiches</button>
         <button class="filter-chip" onclick="filterMenu('Drink', this)">Drinks</button>
     </div>
+
     <div id="productList">Loading...</div>
     <div class="cart-btn" onclick="submitOrder()">PAY & ORDER (<span id="cartCount">0</span>)</div>
 </div>
@@ -39,7 +40,8 @@
 <div id="alarmView" class="hidden">
     <div id="alarmScreen">
         <div class="alarm-msg">ORDER READY!</div>
-        <div style="font-size: 80px;">🔔</div>
+        <div class="alarm-code" id="alarmCodeDisplay">---</div>
+        <div style="font-size: 60px;">🔔</div>
         <button class="stop-btn" onclick="stopAlarm()">I'M COMING!</button>
     </div>
 </div>
@@ -209,6 +211,7 @@
     }
 
     function triggerAlarm() {
+        document.getElementById('alarmCodeDisplay').innerText = orderId;
         showView('alarmView');
         if (navigator.vibrate) navigator.vibrate([1000, 200, 1000, 200, 1000]);
 
