@@ -10,6 +10,13 @@
 
 <div id="menuView">
     <div class="header"><h1>ANGELS BURGER</h1><p>Order & Wait</p></div>
+
+    <div class="filter-container">
+        <button class="filter-chip chip-active" onclick="filterMenu('All', this)">All</button>
+        <button class="filter-chip" onclick="filterMenu('Burger', this)">Burgers</button>
+        <button class="filter-chip" onclick="filterMenu('Sandwich', this)">Sandwiches</button>
+        <button class="filter-chip" onclick="filterMenu('Drink', this)">Drinks</button>
+    </div>
     <div id="productList">Loading...</div>
     <div class="cart-btn" onclick="submitOrder()">PAY & ORDER (<span id="cartCount">0</span>)</div>
 </div>
@@ -41,6 +48,7 @@
     let cart = [];
     let orderId = localStorage.getItem('angels_order_id');
     let alarmInterval = null;
+    let allProductsData = [];
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -77,15 +85,35 @@
     }
 
     fetch('/api/menu').then(r => r.json()).then(products => {
+        allProductsData = products;
+        renderList(allProductsData);
+    }).catch(err => {
+        document.getElementById('productList').innerHTML = '<p style="color:red">Connection Error. Check Wi-Fi.</p>';
+    });
+
+    function filterMenu(category, clickedBtn) {
+        document.querySelectorAll('.filter-chip').forEach(btn => btn.classList.remove('chip-active'));
+        clickedBtn.classList.add('chip-active');
+
+        let filteredList;
+        if (category === 'All') {
+            filteredList = allProductsData;
+        } else {
+            filteredList = allProductsData.filter(p => p.category === category);
+        }
+        renderList(filteredList);
+    }
+
+    function renderList(productsToRender) {
         const list = document.getElementById('productList');
         list.innerHTML = '';
 
-        if (products.length === 0) {
-            list.innerHTML = '<p>No items found.</p>';
+        if (productsToRender.length === 0) {
+            list.innerHTML = '<p style="text-align:center; margin-top:20px; color:#666;">No items found.</p>';
             return;
         }
 
-        products.forEach(p => {
+        productsToRender.forEach(p => {
             const disabledState = p.available ? '' : 'disabled';
             const btnText = p.available ? 'ADD' : 'SOLD OUT';
             const btnColor = p.available ? '#d32f2f' : '#9e9e9e';
@@ -104,9 +132,7 @@
                         </button>
                     </div>`;
         });
-    }).catch(err => {
-        document.getElementById('productList').innerHTML = '<p style="color:red">Connection Error. Check Wi-Fi.</p>';
-    });
+    }
 
     function addToCart(id) {
         cart.push({ productId: id, quantity: 1 });

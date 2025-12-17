@@ -10,8 +10,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.angelsburgerpos.model.CartItem;
@@ -22,11 +26,7 @@ import org.example.angelsburgerpos.service.KioskServer;
 import org.example.angelsburgerpos.service.MyListener;
 import org.example.angelsburgerpos.service.ProductService;
 import org.example.angelsburgerpos.service.ProductServiceImp;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.shape.Circle;
 import org.example.angelsburgerpos.util.InventoryManager;
-import org.example.angelsburgerpos.util.OrderRequest;
 import org.example.angelsburgerpos.util.SalesLogger;
 
 import java.io.IOException;
@@ -37,48 +37,42 @@ import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
 
+    // --- NEW LAYOUT VARIABLES ---
+    @FXML
+    private StackPane mainContentArea; // The parent holder in Center
+    @FXML
+    private AnchorPane menuSection;    // The actual "Burger Menu" UI (we hide this when showing reports)
+
+    // --- SIDEBAR ---
     @FXML
     private Label nameLabel;
     @FXML
     private Label dateLabel;
     @FXML
-    private Label logoLabel;
-
-    @FXML
-    private Button logoutButton;
-    @FXML
-    private Button inventoryButton;
-    @FXML
-    private Button reportsButton;
-    @FXML
-    private Button burgersButton;
-    @FXML
-    private Button sandwichesButton;
-    @FXML
-    private Button drinksButton;
+    private ImageView logo;
     @FXML
     private Label roleLabel;
     @FXML
-    private FlowPane menuContainer;
+    private Button mobileOrdersButton;
     @FXML
     private Button employeesButton;
+    @FXML
+    private Button logoutButton;
+    @FXML
+    private Button menuButton;
+    @FXML
+    private FlowPane menuContainer;
     @FXML
     private Label totalLabel;
     @FXML
     private Button viewCartButton;
-    @FXML
-    private ImageView logo;
 
     private KioskServer kioskServer;
     private ProductService productService;
     private ObservableList<CartItem> cartList = FXCollections.observableArrayList();
-    private MyListener myListener;
     private ObservableList<MobileOrder> pendingOrders = FXCollections.observableArrayList();
-
-
+    private MyListener myListener;
     private User user;
-    @FXML
-    private Button mobileOrdersButton;
 
     public DashboardController() {
         productService = new ProductServiceImp();
@@ -92,11 +86,76 @@ public class DashboardController implements Initializable {
                 addToCart(product);
             }
         };
-//        setLogo();
+
         loadProducts("Burger");
         initClock();
         startKioskServer();
         updateMobileOrderNotification();
+
+        if (menuSection != null) menuSection.setVisible(true);
+    }
+
+    private void loadView(String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent view = loader.load();
+
+            Object controller = loader.getController();
+
+            if (controller instanceof MobileOrdersController) {
+                ((MobileOrdersController) controller).setDashboard(this);
+                ((MobileOrdersController) controller).setOrderList(pendingOrders);
+            }
+
+            if (menuSection != null) menuSection.setVisible(false);
+
+            mainContentArea.getChildren().clear();
+            mainContentArea.getChildren().add(view);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void menuButtonClicked() {
+        mainContentArea.getChildren().clear();
+        if (menuSection != null) {
+            mainContentArea.getChildren().add(menuSection);
+            menuSection.setVisible(true);
+        }
+    }
+
+    @FXML
+    private void inventoryClicked() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/inventory-view.fxml"));
+            Parent view = loader.load();
+            org.example.angelsburgerpos.controller.InventoryController controller = loader.getController();
+            controller.setUser(this.user);
+
+            mainContentArea.getChildren().clear();
+            mainContentArea.getChildren().add(view);
+            if (menuSection != null) menuSection.setVisible(false);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void reportsClicked() {
+        loadView("/org/example/angelsburgerpos/sales-view.fxml");
+    }
+
+    @FXML
+    private void employeesClicked() {
+        loadView("/org/example/angelsburgerpos/employees-view.fxml");
+    }
+
+    @FXML
+    private void viewMobileOrdersClicked() {
+        loadView("/org/example/angelsburgerpos/mobile-orders-view.fxml");
     }
 
     private void startKioskServer() {
@@ -118,14 +177,13 @@ public class DashboardController implements Initializable {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Order received");
         alert.setHeaderText(null);
-        alert.setContentText("New order from" + order.getCustomerName());
+        alert.setContentText("New order from " + order.getCustomerName());
         alert.show();
     }
 
     private void updateMobileOrderNotification() {
         if (mobileOrdersButton != null) {
-            mobileOrdersButton.setText("Mobile Orders");
-
+            mobileOrdersButton.setText("Mobile Orders (" + pendingOrders.size() + ")");
             if (!pendingOrders.isEmpty()) {
                 mobileOrdersButton.setStyle("-fx-background-color: #ff9800; -fx-text-fill: white;");
             } else {
@@ -134,85 +192,35 @@ public class DashboardController implements Initializable {
         }
     }
 
-    @FXML
-    private void openMobileQueue() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/mobile-queue-view.fxml"));
-            Parent root = loader.load();
+    public void finalizeMobileOrder(MobileOrder order) {
+        List<CartItem> itemsToDeduct = new ArrayList<>();
+        List<Product> allProducts = productService.getProducts();
+        double amount = 0.0;
 
-            MobileOrdersController controller = loader.getController();
-            controller.setOrderList(pendingOrders);
+        for (var mobileItem : order.getItems()) {
+            for (Product p : allProducts) {
+                if (p.getId().equals(mobileItem.productId)) {
+                    CartItem item = new CartItem(p, mobileItem.quantity);
 
-            Stage stage = new Stage();
-            stage.setTitle("Order Queue");
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+                    double lineTotal = p.getPrice() * mobileItem.quantity;
+                    amount += lineTotal;
 
-    @FXML
-    private void viewMobileOrdersClicked() {
-        try {
-            FXMLLoader loader = new FXMLLoader((getClass().getResource("/org/example/angelsburgerpos/mobile-orders-view.fxml")));
-            Parent root = loader.load();
-
-            MobileOrdersController controller = loader.getController();
-             controller.setDashboard(this);
-            controller.setOrderList(pendingOrders);
-
-            Stage stage = new Stage();
-            stage.setTitle("Mobile orders");
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    //accept an order called from the mobileordercontroller
-    public void acceptMobileOrder(MobileOrder order) {
-        for (OrderRequest req : order.getItems()) {
-            Product product = findyById(req.productId);
-            if (product != null) {
-                for (int i = 0; i < req.quantity; i++) {
-                    addToCart(product);
-                }
-            }
-        }
-        pendingOrders.remove(order);
-        updateMobileOrderNotification();
-    }
-
-    public void handleMobileOrder(List<OrderRequest> mobileOrders) {
-        System.out.println("Received");
-        for (OrderRequest req : mobileOrders) {
-            Product product = findyById(req.productId);
-
-            if (product != null) {
-                for (int i = 0; i < req.quantity; i++) {
-                    addToCart(product);
+                    itemsToDeduct.add(item);
+                    break;
                 }
             }
         }
 
-    }
-
-    private Product findyById(String id) {
-        for (Product p : productService.getProducts()) {
-            if (p.getId().equals(id)) {
-                return p;
-            }
+        if (!itemsToDeduct.isEmpty()) {
+            InventoryManager.reduceStock(itemsToDeduct);
+            System.out.println("Inventory deducted.");
         }
-        return null;
-    }
 
-    public void stopServer() {
-        if (kioskServer != null) {
-            kioskServer.stop();
-        }
+        SalesLogger.logSale(amount);
+
+        org.example.angelsburgerpos.model.Receipt receipt = new org.example.angelsburgerpos.model.Receipt(itemsToDeduct, amount, amount, 0.0);
+        receipt.saveToFile();
+        System.out.println("Receipt saved.");
     }
 
     private void initClock() {
@@ -234,11 +242,9 @@ public class DashboardController implements Initializable {
                 break;
             }
         }
-
         if (!found) {
             cartList.add(new CartItem(product, 1));
         }
-
         updateFooter();
     }
 
@@ -251,22 +257,6 @@ public class DashboardController implements Initializable {
         }
         totalLabel.setText("P " + String.format("%.2f", total));
         viewCartButton.setText("VIEW CART (" + count + ")");
-    }
-
-    @FXML
-    private void reportsClicked() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/sales-view.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = new Stage();
-            stage.setTitle("Sales Report");
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @FXML
@@ -306,27 +296,6 @@ public class DashboardController implements Initializable {
         loadProducts("Drink");
     }
 
-
-    @FXML
-    private void inventoryClicked() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/inventory-view.fxml"));
-            Parent root = loader.load();
-
-            if (user.getRole().equalsIgnoreCase("cashier")) {
-
-            }
-
-            Stage stage = new Stage();
-            stage.setTitle("Inventory Management");
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void loadProducts(String category) {
         menuContainer.getChildren().clear();
         List<Product> products = productService.getProducts();
@@ -336,11 +305,8 @@ public class DashboardController implements Initializable {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/product-card-view.fxml"));
                     AnchorPane cardBox = loader.load();
-
                     ProductCardController cardController = loader.getController();
-
                     cardController.setData(product, myListener);
-
                     menuContainer.getChildren().add(cardBox);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -350,30 +316,14 @@ public class DashboardController implements Initializable {
     }
 
     @FXML
-    private void employeesClicked() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/employees-view.fxml"));
-            javafx.scene.Parent root = loader.load();
-
-            Stage stage = new Stage();
-            stage.setTitle("Employee Management");
-            stage.setScene(new javafx.scene.Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
     private void logoutClicked() {
         try {
+            stopServer();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/login-view.fxml"));
-            javafx.scene.Parent root = loader.load();
-
+            Parent root = loader.load();
             Stage stage = (Stage) logoutButton.getScene().getWindow();
-            stage.setScene(new javafx.scene.Scene(root));
+            stage.setScene(new Scene(root));
             stage.centerOnScreen();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -396,20 +346,10 @@ public class DashboardController implements Initializable {
             }
             if (getClass().getResource(path) != null) {
                 String imagePath = getClass().getResource(path).toExternalForm();
-                Image image = new Image(imagePath);
-                logo.setImage(image);
+                logo.setImage(new Image(imagePath));
                 double radius = Math.min(logo.getFitWidth(), logo.getFitHeight()) / 2;
-
-                Circle clip = new Circle(
-                        logo.getFitWidth() / 2,
-                        logo.getFitHeight() / 2,
-                        radius
-                );
-
+                Circle clip = new Circle(logo.getFitWidth() / 2, logo.getFitHeight() / 2, radius);
                 logo.setClip(clip);
-
-            } else {
-                System.out.println("Logo file not found at: " + path);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -423,49 +363,10 @@ public class DashboardController implements Initializable {
         setLogo(user);
         if (user.getRole().equalsIgnoreCase("Cashier")) {
             employeesButton.setVisible(false);
-
         }
     }
 
-    public void finalizeMobileOrder(MobileOrder order) {
-        List<CartItem> itemsToDeduct = new ArrayList<>();
-        List<Product> allProducts = productService.getProducts();
-        Double amount = 0.0;
-
-        for (var mobileItem : order.getItems()) {
-            for (Product p : allProducts) {
-                if (p.getId().equals(mobileItem.productId)) {
-                    CartItem item = new CartItem(p, mobileItem.quantity);
-                    itemsToDeduct.add(item);
-                    double itemTotal = p.getPrice() * mobileItem.quantity;
-                    amount += itemTotal;
-                    break;
-                }
-            }
-        }
-
-        if (!itemsToDeduct.isEmpty()) {
-            InventoryManager.reduceStock(itemsToDeduct);
-            System.out.println("Inventory deducted.");
-        }
-        System.out.println("LOGGING SALE: PHP " + amount);
-        SalesLogger.logSale(amount);
-
-        org.example.angelsburgerpos.model.Receipt receipt = new org.example.angelsburgerpos.model.Receipt(itemsToDeduct, amount, amount, 0.0);
-        receipt.saveToFile();
-        System.out.println("Receipt saved.");
-    }
-
-    private void saveToSalesCSV(MobileOrder order) {
-        try (java.io.FileWriter fw = new java.io.FileWriter("sales_log.csv", true);
-             java.io.BufferedWriter bw = new java.io.BufferedWriter(fw);
-             java.io.PrintWriter out = new java.io.PrintWriter(bw)) {
-
-            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            out.println(timestamp + ",MOBILE-" + order.getOrderId() + ",PAID");
-
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
-        }
+    public void stopServer() {
+        if (kioskServer != null) kioskServer.stop();
     }
 }

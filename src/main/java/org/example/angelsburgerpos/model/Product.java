@@ -5,7 +5,9 @@ public class Product {
     private String name;
     private double price;
     private String imagePath;
+
     private String category;
+
     private int stock;
 
     public Product(String id, String name, double price, String imagePath, String category, int stock) {
@@ -14,7 +16,12 @@ public class Product {
         this.price = price;
         this.imagePath = imagePath;
         this.category = category;
+
         this.stock = stock;
+    }
+
+    public String getCategory() {
+        return category;
     }
 
     public String getId() {
@@ -33,15 +40,15 @@ public class Product {
         return imagePath;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
     public int getStock() {
         return stock;
     }
 
     public void setStock(int stock) {
         this.stock = stock;
+    }
+
+    public boolean isAvailable() {
+        return stock > 0;
     }
 }

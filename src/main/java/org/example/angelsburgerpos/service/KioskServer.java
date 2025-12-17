@@ -15,7 +15,6 @@ import org.example.angelsburgerpos.util.OrderRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class KioskServer {
 
@@ -24,6 +23,7 @@ public class KioskServer {
     private final Gson gson = new Gson();
     private Javalin app;
     private static int orderCounter = 1;
+
     public KioskServer(ProductService productService, DashboardController dashboard) {
         this.productService = productService;
         this.dashboard = dashboard;
@@ -32,10 +32,11 @@ public class KioskServer {
     private boolean checkAvailability(Product p){
         return InventoryManager.canMakeProduct(p.getId(), 1);
     }
+
     public void startServer() {
         app = Javalin.create(config -> {
             config.staticFiles.add("webapp", Location.CLASSPATH);
-        }).start(5050); //5050 makapasa HAHAHAHAAHAH
+        }).start(5050);
 
         app.get("/api/menu", ctx -> {
             List<Product> allProducts = productService.getProducts();
@@ -49,13 +50,14 @@ public class KioskServer {
                         "id", p.getId(),
                         "name", p.getName(),
                         "price", p.getPrice(),
+                        "category", p.getCategory(),
                         "available", available
                 ));
-
             }
             String jsonResponse = gson.toJson(menuResponse);
             ctx.result(jsonResponse).contentType("application/json");
         });
+
         app.post("/api/order", ctx -> {
             String body = ctx.body();
             try {
@@ -75,8 +77,6 @@ public class KioskServer {
                 System.out.println("Error: " +  e.getMessage());
                 ctx.status(400).result("Error processing order. Please try again.");
             }
-
-
         });
 
         app.get("/api/order/{id}/status", ctx -> {
@@ -94,10 +94,10 @@ public class KioskServer {
             ctx.result(status);
         });
     }
-        public void stop () {
-            if (app != null) {
-                app.stop();
-            }
-        }
 
+    public void stop () {
+        if (app != null) {
+            app.stop();
+        }
     }
+}

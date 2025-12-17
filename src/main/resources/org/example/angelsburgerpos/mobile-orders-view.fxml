@@ -38,7 +38,7 @@
                     <children>
                         <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 15;">
                             <children>
-                                <Label text="KITCHEN QUEUE (PAID ORDERS)" textFill="#1b5e20">
+                                <Label text="KITCHEN QUEUE (PENDING ORDERS)" textFill="#1b5e20">
                                     <font>
                                         <Font name="System Bold" size="20.0" />
                                     </font>

@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="500.0" spacing="15.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.angelsburgerpos.controller.SalesController">
+<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="500.0" spacing="15.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.angelsburgerpos.controller.SalesController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -17,11 +19,20 @@
                 <Font name="System Bold" size="24.0" />
             </font>
         </Label>
-        <Label fx:id="totalSalesLabel" text="Total Revenue: P 0.00" textFill="#2e7d32">
-            <font>
-                <Font name="System Bold" size="18.0" />
-            </font>
-        </Label>
+      <HBox prefHeight="30.0" prefWidth="460.0">
+         <children>
+              <Label fx:id="totalSalesLabel" prefHeight="27.0" prefWidth="267.0" text="Total Revenue: P 0.00" textFill="#2e7d32">
+                  <font>
+                      <Font name="System Bold" size="18.0" />
+                  </font>
+              </Label>
+            <ComboBox fx:id="filterCombo" prefWidth="150.0" promptText="Filter by">
+               <HBox.margin>
+                  <Insets left="130.0" />
+               </HBox.margin>
+            </ComboBox>
+         </children>
+      </HBox>
         <TableView fx:id="salesTable" VBox.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="colDate" prefWidth="150.0" text="Date" />

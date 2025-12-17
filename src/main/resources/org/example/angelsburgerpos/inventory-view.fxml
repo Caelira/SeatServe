@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="600.0" prefWidth="700.0" spacing="15.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.angelsburgerpos.controller.InventoryController">
+<VBox prefHeight="600.0" prefWidth="700.0" spacing="15.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.angelsburgerpos.controller.InventoryController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -38,7 +38,7 @@
             <children>
                 <Label style="-fx-font-weight: bold;" text="Restock Selected:" />
                 <TextField fx:id="restockInput" prefWidth="80.0" promptText="Qty" />
-                <Button mnemonicParsing="false" onAction="#addStock" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="ADD STOCK">
+                <Button fx:id="restockBtn" mnemonicParsing="false" onAction="#addStock" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="ADD STOCK">
                     <font>
                         <Font name="System Bold" size="12.0" />
                     </font>

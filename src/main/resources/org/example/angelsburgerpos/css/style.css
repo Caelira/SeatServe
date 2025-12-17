@@ -56,3 +56,8 @@
     -fx-text-fill: white;
     -fx-font-weight: bold;
 }
+
+.table-view .column-header .label {
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+}
