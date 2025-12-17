@@ -19,7 +19,22 @@
     </div>
 
     <div id="productList">Loading...</div>
-    <div class="cart-btn" onclick="submitOrder()">PAY & ORDER (<span id="cartCount">0</span>)</div>
+    <div class="cart-btn" onclick="showCart()">VIEW CART (<span id="cartCount">0</span>)</div>
+</div>
+
+<div id="cartView" class="hidden">
+    <div class="cart-header">
+        <h2>Your Order</h2>
+        <div style="font-size: 24px;">🛒</div>
+    </div>
+
+    <div id="cartItemsList">
+    </div>
+
+    <div class="cart-total">Total: P <span id="cartTotalDisplay">0.00</span></div>
+
+    <button class="confirm-btn" onclick="submitOrder()">CONFIRM ORDER</button>
+    <button class="back-btn" onclick="backToMenu()">ADD MORE ITEMS</button>
 </div>
 
 <div id="paymentView" class="hidden">
@@ -60,10 +75,9 @@
         }
     };
 
+    // --- AUDIO HELPERS ---
     function unlockAudio() {
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const buffer = audioCtx.createBuffer(1, 1, 22050);
         const source = audioCtx.createBufferSource();
         source.buffer = buffer;
@@ -86,6 +100,7 @@
         osc.stop(audioCtx.currentTime + 0.5);
     }
 
+    // --- FETCHING DATA ---
     fetch('/api/menu').then(r => r.json()).then(products => {
         allProductsData = products;
         renderList(allProductsData);
@@ -109,12 +124,10 @@
     function renderList(productsToRender) {
         const list = document.getElementById('productList');
         list.innerHTML = '';
-
         if (productsToRender.length === 0) {
             list.innerHTML = '<p style="text-align:center; margin-top:20px; color:#666;">No items found.</p>';
             return;
         }
-
         productsToRender.forEach(p => {
             const disabledState = p.available ? '' : 'disabled';
             const btnText = p.available ? 'ADD' : 'SOLD OUT';
@@ -136,10 +149,66 @@
         });
     }
 
+    // --- CART LOGIC ---
+
     function addToCart(id) {
+        // Add raw item ID
         cart.push({ productId: id, quantity: 1 });
+        updateCartCount();
+    }
+
+    function updateCartCount() {
         document.getElementById('cartCount').innerText = cart.length;
     }
+
+    // 1. SHOW CART VIEW
+    function showCart() {
+        if (cart.length === 0) return alert("Your cart is empty!");
+
+        const list = document.getElementById('cartItemsList');
+        list.innerHTML = '';
+        let total = 0;
+
+        // Render each item in the cart
+        cart.forEach((item, index) => {
+            // Find full product details based on ID
+            const product = allProductsData.find(p => p.id === item.productId);
+
+            if (product) {
+                total += product.price;
+                list.innerHTML += `
+                        <div class="cart-item">
+                            <div>
+                                <b>${product.name}</b><br>
+                                <span class="price">P ${product.price}</span>
+                            </div>
+                            <button class="remove-btn" onclick="removeFromCart(${index})">X</button>
+                        </div>
+                    `;
+            }
+        });
+
+        document.getElementById('cartTotalDisplay').innerText = total.toFixed(2);
+        showView('cartView');
+    }
+
+    // 2. REMOVE ITEM
+    function removeFromCart(index) {
+        cart.splice(index, 1); // Remove item at specific index
+        updateCartCount();
+
+        if (cart.length === 0) {
+            backToMenu(); // Go back if empty
+        } else {
+            showCart(); // Refresh the list
+        }
+    }
+
+    function backToMenu() {
+        showView('menuView');
+    }
+
+    // --- ORDER SUBMISSION ---
 
     function submitOrder() {
         if(cart.length === 0) return alert("Empty Cart!");
@@ -153,6 +222,11 @@
                 localStorage.setItem('angels_order_id', id);
                 document.getElementById('orderCode').innerText = id;
                 showView('paymentView');
+
+                // Clear cart after submitting
+                cart = [];
+                updateCartCount();
+
                 startPolling();
             });
     }
@@ -162,7 +236,6 @@
             .then(r => r.text())
             .then(status => {
                 document.getElementById('orderCode').innerText = id;
-
                 if (status === 'PENDING_PAYMENT') {
                     showView('paymentView');
                     startPolling();
@@ -214,7 +287,6 @@
         document.getElementById('alarmCodeDisplay').innerText = orderId;
         showView('alarmView');
         if (navigator.vibrate) navigator.vibrate([1000, 200, 1000, 200, 1000]);
-
         if (alarmInterval) clearInterval(alarmInterval);
         playBeep();
         alarmInterval = setInterval(playBeep, 800);
@@ -228,10 +300,12 @@
     }
 
     function showView(viewId) {
-        ['menuView', 'paymentView', 'preparingView', 'alarmView'].forEach(id => {
-            document.getElementById(id).classList.add('hidden');
+        ['menuView', 'cartView', 'paymentView', 'preparingView', 'alarmView'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.classList.add('hidden');
         });
-        document.getElementById(viewId).classList.remove('hidden');
+        const target = document.getElementById(viewId);
+        if(target) target.classList.remove('hidden');
     }
 </script>
 </body>

@@ -36,14 +36,10 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
-
-    // --- NEW LAYOUT VARIABLES ---
     @FXML
-    private StackPane mainContentArea; // The parent holder in Center
+    private StackPane mainContentArea;
     @FXML
-    private AnchorPane menuSection;    // The actual "Burger Menu" UI (we hide this when showing reports)
-
-    // --- SIDEBAR ---
+    private AnchorPane menuSection;
     @FXML
     private Label nameLabel;
     @FXML
