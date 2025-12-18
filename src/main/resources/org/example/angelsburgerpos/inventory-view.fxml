@@ -38,11 +38,14 @@
             <children>
                 <Label style="-fx-font-weight: bold;" text="Restock Selected:" />
                 <TextField fx:id="restockInput" prefWidth="80.0" promptText="Qty" />
-                <Button fx:id="restockBtn" mnemonicParsing="false" onAction="#addStock" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="ADD STOCK">
+                <Button fx:id="restockBtn" mnemonicParsing="false" onAction="#addStock" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="ADD">
                     <font>
                         <Font name="System Bold" size="12.0" />
                     </font>
                 </Button>
+            <Button fx:id="reduceBtn" mnemonicParsing="false" onAction="#setReduceBtn" text="REDUCE" />
+            <Button fx:id="addIngBtn" mnemonicParsing="false" onAction="#setAddingBtn" text="ADD INGREDIENT" />
+            <Button fx:id="deleteBtn" mnemonicParsing="false" onAction="#setDeleteBtn" text="DELETE" />
                 <Region HBox.hgrow="ALWAYS" />
                 <Button mnemonicParsing="false" onAction="#closeWindow" text="CLOSE" />
             </children>

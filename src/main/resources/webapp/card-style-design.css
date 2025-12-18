@@ -194,6 +194,10 @@ body {
     border: none; border-radius: 50px; margin-top: 30px;
     font-weight: bold; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
+.silenced {
+    animation: none !important;
+    background-color: #2e7d32 !important; /* Static Green */
+}
 
 .cart-btn {
     position: fixed; bottom: 20px; right: 20px;

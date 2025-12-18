@@ -72,7 +72,6 @@ public class SalesController implements Initializable {
                 e.printStackTrace();
             }
         }
-        // Initially show everything
         filterData();
     }
 

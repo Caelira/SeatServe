@@ -57,7 +57,7 @@
         <div class="alarm-msg">ORDER READY!</div>
         <div class="alarm-code" id="alarmCodeDisplay">---</div>
         <div style="font-size: 60px;">🔔</div>
-        <button class="stop-btn" onclick="stopAlarm()">I'M COMING!</button>
+        <button class="stop-btn" id="actionBtn" onclick="silenceAlarm()">I'M COMING!</button>
     </div>
 </div>
 
@@ -298,7 +298,31 @@
         localStorage.removeItem('angels_order_id');
         location.reload();
     }
+    function finishOrder() {
+        // NOW we clear the data and reload
+        localStorage.removeItem('angels_order_id');
+        location.reload();
+    }
+    function silenceAlarm() {
+        // 1. Stop the Noise and Vibration
+        if (alarmInterval) clearInterval(alarmInterval);
+        if (navigator.vibrate) navigator.vibrate(0);
 
+        // 2. Stop the Screen Flashing (Make it static green)
+        document.getElementById('alarmScreen').classList.add('silenced');
+
+        // 3. Change the Text instructions
+        document.querySelector('.alarm-msg').innerText = "Show this to Cashier:";
+
+        // 4. Change the Button to the "Final" step
+        const btn = document.getElementById('actionBtn');
+        btn.innerText = "ORDER RECEIVED (EXIT)";
+        btn.style.backgroundColor = "#ff9800"; // Change color to Orange to show state change
+        btn.style.color = "white";
+
+        // 5. Change the button action to actually finish the app
+        btn.onclick = finishOrder;
+    }
     function showView(viewId) {
         ['menuView', 'cartView', 'paymentView', 'preparingView', 'alarmView'].forEach(id => {
             const el = document.getElementById(id);

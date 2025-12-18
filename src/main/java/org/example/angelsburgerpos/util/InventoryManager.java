@@ -1,13 +1,9 @@
 package org.example.angelsburgerpos.util;
 
-import javafx.fxml.FXMLLoader;
-import org.example.angelsburgerpos.controller.InventoryController;
 import org.example.angelsburgerpos.model.CartItem;
 import org.example.angelsburgerpos.model.Ingredient;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 public class InventoryManager {
@@ -18,13 +14,16 @@ public class InventoryManager {
     private static Map<String, Ingredient> ingredientMap = new HashMap<>();
     private static Map<String, Map<String, Integer>> recipeMap = new HashMap<>();
     private static Runnable refreshListener;
+
     public static void initialize() {
         loadIngredients();
         loadRecipes();
     }
+
     public static void setRefreshListener(Runnable listener) {
         refreshListener = listener;
     }
+
     private static void loadIngredients() {
         try {
             File file = new File(INGREDIENTS_FILE);
@@ -42,6 +41,16 @@ public class InventoryManager {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void addIngredient(Ingredient newIng) {
+        ingredientMap.put(newIng.getId(), newIng);
+        reduceStock(new ArrayList<>());
+    }
+
+    public static void deleteIngredient(String id) {
+        ingredientMap.remove(id);
+        reduceStock(new ArrayList<>());
     }
 
     private static void loadRecipes() {
@@ -87,9 +96,7 @@ public class InventoryManager {
                     String ingId = entry.getKey();
                     int qtyPerUnit = entry.getValue();
                     int totalDeduction = qtyPerUnit * qtySold;
-//                    System.out.println(prodId + "item: " + item.getName() + " QTY: " + item.getTotal());
-//                    Ingredient ing = ingredientMap.get(ingId);
-//                    ing.reduceStock(item.getQuantity());
+
                     if (ingredientMap.containsKey(ingId)) {
                         Ingredient ing = ingredientMap.get(ingId);
                         int currentStock = ing.getStock();
@@ -98,14 +105,13 @@ public class InventoryManager {
                 }
             }
         }
-        FXMLLoader loader = new FXMLLoader(InventoryManager.class.getResource("/org/example/angelsburgerpos/controller/InventoryController.java"));
 
         saveInventory();
         if (refreshListener != null) {
             javafx.application.Platform.runLater(refreshListener);
-            System.out.println("Inventory UI refreshed automatically.");
         }
     }
+
     public static List<Ingredient> getAllIngredients() {
         if (ingredientMap.isEmpty()) {
             initialize();
@@ -114,6 +120,7 @@ public class InventoryManager {
         list.sort(Comparator.comparing(Ingredient::getId));
         return list;
     }
+
     public static boolean canMakeProduct(String productId, int quantity){
         if(ingredientMap.isEmpty()){
             initialize();
@@ -132,15 +139,15 @@ public class InventoryManager {
                     if(ing.getStock() < totalRequired){
                         return false;
                     }
-                }else{
+                } else {
                     System.out.println("Missing ingredients");
                     return false;
                 }
             }
-
         }
         return true;
     }
+
     private static void saveInventory() {
         try {
             File file = new File(INGREDIENTS_FILE);
