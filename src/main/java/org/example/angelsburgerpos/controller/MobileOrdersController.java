@@ -1,5 +1,6 @@
 package org.example.angelsburgerpos.controller;
 
+import javafx.animation.PauseTransition;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -8,6 +9,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
+import javafx.util.Duration;
 import org.example.angelsburgerpos.model.MobileOrder;
 
 import java.io.IOException;
@@ -16,10 +18,8 @@ import java.util.ResourceBundle;
 
 public class MobileOrdersController implements Initializable {
 
-    @FXML
-    private FlowPane acceptedContainer; // Only one container now
-    @FXML
-    private TextField codeField;
+    @FXML private FlowPane acceptedContainer;
+    @FXML private TextField codeField;
 
     private ObservableList<MobileOrder> orderList;
     private DashboardController dashboard;
@@ -42,6 +42,8 @@ public class MobileOrdersController implements Initializable {
 
     private void refreshQueue() {
         acceptedContainer.getChildren().clear();
+
+        if (orderList == null) return;
 
         for (MobileOrder order : orderList) {
             if ("PREPARING".equals(order.getStatus())) {
@@ -83,16 +85,11 @@ public class MobileOrdersController implements Initializable {
         order.setStatus("READY");
         refreshQueue();
 
-        new Thread(() -> {
-            try {
-                Thread.sleep(300000); // 5 minutes waits - collects basura
-                javafx.application.Platform.runLater(() -> {
-                    orderList.remove(order);
-                    System.out.println("Order #" + order.getOrderId() + " auto-deleted.");
-                });
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        PauseTransition delay = new PauseTransition(Duration.minutes(5));
+        delay.setOnFinished(event -> {
+            orderList.remove(order);
+            System.out.println("Order #" + order.getOrderId() + " auto-deleted.");
+        });
+        delay.play();
     }
 }

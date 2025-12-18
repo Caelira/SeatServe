@@ -26,8 +26,7 @@ import org.example.angelsburgerpos.service.KioskServer;
 import org.example.angelsburgerpos.service.MyListener;
 import org.example.angelsburgerpos.service.ProductService;
 import org.example.angelsburgerpos.service.ProductServiceImp;
-import org.example.angelsburgerpos.util.InventoryManager;
-import org.example.angelsburgerpos.util.SalesLogger;
+import org.example.angelsburgerpos.service.TransactionService;
 
 import java.io.IOException;
 import java.net.URL;
@@ -36,32 +35,18 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
-    @FXML
-    private StackPane mainContentArea;
-    @FXML
-    private AnchorPane menuSection;
-    @FXML
-    private Label nameLabel;
-    @FXML
-    private Label dateLabel;
-    @FXML
-    private ImageView logo;
-    @FXML
-    private Label roleLabel;
-    @FXML
-    private Button mobileOrdersButton;
-    @FXML
-    private Button employeesButton;
-    @FXML
-    private Button logoutButton;
-    @FXML
-    private Button menuButton;
-    @FXML
-    private FlowPane menuContainer;
-    @FXML
-    private Label totalLabel;
-    @FXML
-    private Button viewCartButton;
+    @FXML private StackPane mainContentArea;
+    @FXML private AnchorPane menuSection;
+    @FXML private Label nameLabel;
+    @FXML private Label dateLabel;
+    @FXML private ImageView logo;
+    @FXML private Label roleLabel;
+    @FXML private Button mobileOrdersButton;
+    @FXML private Button employeesButton;
+    @FXML private Button logoutButton;
+    @FXML private FlowPane menuContainer;
+    @FXML private Label totalLabel;
+    @FXML private Button viewCartButton;
 
     private KioskServer kioskServer;
     private ProductService productService;
@@ -76,12 +61,7 @@ public class DashboardController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        myListener = new MyListener() {
-            @Override
-            public void onClickListener(Product product) {
-                addToCart(product);
-            }
-        };
+        myListener = this::addToCart;
 
         loadProducts("Burger");
         initClock();
@@ -170,11 +150,7 @@ public class DashboardController implements Initializable {
     public void addPendingOrder(MobileOrder order) {
         pendingOrders.add(order);
         updateMobileOrderNotification();
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Order received");
-        alert.setHeaderText(null);
-        alert.setContentText("New order from " + order.getCustomerName());
-        alert.show();
+
     }
 
     private void updateMobileOrderNotification() {
@@ -190,33 +166,21 @@ public class DashboardController implements Initializable {
 
     public void finalizeMobileOrder(MobileOrder order) {
         List<CartItem> itemsToDeduct = new ArrayList<>();
-        List<Product> allProducts = productService.getProducts();
         double amount = 0.0;
 
         for (var mobileItem : order.getItems()) {
-            for (Product p : allProducts) {
-                if (p.getId().equals(mobileItem.productId)) {
-                    CartItem item = new CartItem(p, mobileItem.quantity);
-
-                    double lineTotal = p.getPrice() * mobileItem.quantity;
-                    amount += lineTotal;
-
-                    itemsToDeduct.add(item);
-                    break;
-                }
+            Product p = productService.findById(mobileItem.productId);
+            if (p != null) {
+                CartItem item = new CartItem(p, mobileItem.quantity);
+                amount += item.getTotal();
+                itemsToDeduct.add(item);
             }
         }
 
         if (!itemsToDeduct.isEmpty()) {
-            InventoryManager.reduceStock(itemsToDeduct);
-            System.out.println("Inventory deducted.");
+            TransactionService.processTransaction(itemsToDeduct, amount, amount);
+            System.out.println("Mobile Order Finalized.");
         }
-
-        SalesLogger.logSale(amount);
-
-        org.example.angelsburgerpos.model.Receipt receipt = new org.example.angelsburgerpos.model.Receipt(itemsToDeduct, amount, amount, 0.0);
-        receipt.saveToFile();
-        System.out.println("Receipt saved.");
     }
 
     private void initClock() {

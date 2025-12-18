@@ -75,7 +75,6 @@
         }
     };
 
-    // --- AUDIO HELPERS ---
     function unlockAudio() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const buffer = audioCtx.createBuffer(1, 1, 22050);
@@ -100,7 +99,6 @@
         osc.stop(audioCtx.currentTime + 0.5);
     }
 
-    // --- FETCHING DATA ---
     fetch('/api/menu').then(r => r.json()).then(products => {
         allProductsData = products;
         renderList(allProductsData);
@@ -149,10 +147,8 @@
         });
     }
 
-    // --- CART LOGIC ---
 
     function addToCart(id) {
-        // Add raw item ID
         cart.push({ productId: id, quantity: 1 });
         updateCartCount();
     }
@@ -161,7 +157,6 @@
         document.getElementById('cartCount').innerText = cart.length;
     }
 
-    // 1. SHOW CART VIEW
     function showCart() {
         if (cart.length === 0) return alert("Your cart is empty!");
 
@@ -169,9 +164,7 @@
         list.innerHTML = '';
         let total = 0;
 
-        // Render each item in the cart
         cart.forEach((item, index) => {
-            // Find full product details based on ID
             const product = allProductsData.find(p => p.id === item.productId);
 
             if (product) {
@@ -192,15 +185,14 @@
         showView('cartView');
     }
 
-    // 2. REMOVE ITEM
     function removeFromCart(index) {
-        cart.splice(index, 1); // Remove item at specific index
+        cart.splice(index, 1);
         updateCartCount();
 
         if (cart.length === 0) {
-            backToMenu(); // Go back if empty
+            backToMenu();
         } else {
-            showCart(); // Refresh the list
+            showCart();
         }
     }
 
@@ -208,7 +200,6 @@
         showView('menuView');
     }
 
-    // --- ORDER SUBMISSION ---
 
     function submitOrder() {
         if(cart.length === 0) return alert("Empty Cart!");
@@ -223,7 +214,6 @@
                 document.getElementById('orderCode').innerText = id;
                 showView('paymentView');
 
-                // Clear cart after submitting
                 cart = [];
                 updateCartCount();
 
@@ -299,28 +289,23 @@
         location.reload();
     }
     function finishOrder() {
-        // NOW we clear the data and reload
         localStorage.removeItem('angels_order_id');
         location.reload();
     }
     function silenceAlarm() {
-        // 1. Stop the Noise and Vibration
         if (alarmInterval) clearInterval(alarmInterval);
         if (navigator.vibrate) navigator.vibrate(0);
 
-        // 2. Stop the Screen Flashing (Make it static green)
         document.getElementById('alarmScreen').classList.add('silenced');
 
-        // 3. Change the Text instructions
         document.querySelector('.alarm-msg').innerText = "Show this to Cashier:";
 
-        // 4. Change the Button to the "Final" step
+
         const btn = document.getElementById('actionBtn');
         btn.innerText = "ORDER RECEIVED (EXIT)";
-        btn.style.backgroundColor = "#ff9800"; // Change color to Orange to show state change
+        btn.style.backgroundColor = "#ff9800";
         btn.style.color = "white";
 
-        // 5. Change the button action to actually finish the app
         btn.onclick = finishOrder;
     }
     function showView(viewId) {

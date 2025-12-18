@@ -8,10 +8,8 @@ import java.time.format.DateTimeFormatter;
 
 public class SalesLogger {
 
-    private static final String FILE_PATH = "sales_log.csv";
-
     public static void logSale(double totalAmount) {
-        try (FileWriter fw = new FileWriter(FILE_PATH, true);
+        try (FileWriter fw = new FileWriter(AppConfig.SALES_LOG_FILE, true);
              PrintWriter pw = new PrintWriter(fw)) {
 
             LocalDateTime now = LocalDateTime.now();

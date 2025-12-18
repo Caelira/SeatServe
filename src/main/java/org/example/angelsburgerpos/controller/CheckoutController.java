@@ -11,8 +11,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.angelsburgerpos.model.CartItem;
 import org.example.angelsburgerpos.model.Receipt;
-import org.example.angelsburgerpos.util.InventoryManager;
-import org.example.angelsburgerpos.util.SalesLogger;
+import org.example.angelsburgerpos.service.TransactionService;
 
 import java.io.IOException;
 
@@ -43,14 +42,7 @@ public class CheckoutController {
                 return;
             }
 
-            double change = cash - totalAmount;
-
-            Receipt receipt = new Receipt(cartItems, totalAmount, cash, change);
-            receipt.saveToFile();
-
-            SalesLogger.logSale(totalAmount);
-
-            InventoryManager.reduceStock(cartItems);
+            Receipt receipt = TransactionService.processTransaction(cartItems, totalAmount, cash);
 
             openReceiptWindow(receipt.getContent());
             closeWindow();

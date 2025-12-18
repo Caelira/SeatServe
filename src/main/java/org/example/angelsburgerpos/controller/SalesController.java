@@ -10,16 +10,16 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.example.angelsburgerpos.model.SaleRecord;
+import org.example.angelsburgerpos.util.AppConfig;
+import org.example.angelsburgerpos.util.FileUtil;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.Scanner;
 
 public class SalesController implements Initializable {
 
@@ -50,26 +50,19 @@ public class SalesController implements Initializable {
 
     private void loadSalesData() {
         masterList.clear();
-        File file = new File("sales_log.csv");
+        List<String> lines = FileUtil.readLines(AppConfig.SALES_LOG_FILE);
 
-        if (file.exists()) {
-            try (Scanner scanner = new Scanner(file)) {
-                while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    String[] parts = line.split(",");
-                    if (parts.length == 3) {
-                        try {
-                            String date = parts[0];
-                            String time = parts[1];
-                            double amount = Double.parseDouble(parts[2]);
+        for (String line : lines) {
+            String[] parts = line.split(",");
+            if (parts.length == 3) {
+                try {
+                    String date = parts[0];
+                    String time = parts[1];
+                    double amount = Double.parseDouble(parts[2]);
 
-                            masterList.add(new SaleRecord(date, time, amount));
-                        } catch (NumberFormatException e) {
-                        }
-                    }
+                    masterList.add(new SaleRecord(date, time, amount));
+                } catch (NumberFormatException e) {
                 }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
             }
         }
         filterData();

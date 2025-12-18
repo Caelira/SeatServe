@@ -11,35 +11,26 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import org.example.angelsburgerpos.model.User;
+import org.example.angelsburgerpos.util.AppConfig;
+import org.example.angelsburgerpos.util.FileUtil;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Scanner;
 
 public class EmployeesController implements Initializable {
 
-    private static final String USERS_FILE = "src/main/resources/org/example/angelsburgerpos/util/users.txt";
-    @FXML
-    private TableView<User> usersTable;
-    @FXML
-    private TableColumn<User, String> colUsername;
-    @FXML
-    private TableColumn<User, String> colFullname;
-    @FXML
-    private TableColumn<User, String> colRole;
-    @FXML
-    private TextField usernameInput;
-    @FXML
-    private TextField passwordInput;
-    @FXML
-    private TextField fullnameInput;
-    @FXML
-    private ComboBox<String> roleInput;
+    @FXML private TableView<User> usersTable;
+    @FXML private TableColumn<User, String> colUsername;
+    @FXML private TableColumn<User, String> colFullname;
+    @FXML private TableColumn<User, String> colRole;
+    @FXML private TextField usernameInput;
+    @FXML private TextField passwordInput;
+    @FXML private TextField fullnameInput;
+    @FXML private ComboBox<String> roleInput;
     private ObservableList<User> userList = FXCollections.observableArrayList();
 
     @Override
@@ -55,25 +46,19 @@ public class EmployeesController implements Initializable {
 
     private void loadUsers() {
         userList.clear();
-        File file = new File(USERS_FILE);
-        if (file.exists()) {
-            try (Scanner scanner = new Scanner(file)) {
-                while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    String[] parts = line.split(",");
-                    if (parts.length == 4) {
-                        userList.add(new User(parts[0], parts[1], parts[2], parts[3]));
-                    }
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+        List<String> lines = FileUtil.readLines(AppConfig.USERS_FILE);
+
+        for (String line : lines) {
+            String[] parts = line.split(",");
+            if (parts.length == 4) {
+                userList.add(new User(parts[0], parts[1], parts[2], parts[3]));
             }
         }
         usersTable.setItems(userList);
     }
 
     private void saveUsers() {
-        try (PrintWriter pw = new PrintWriter(new FileWriter(USERS_FILE))) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(AppConfig.USERS_FILE))) {
             for (User u : userList) {
                 pw.printf("%s,%s,%s,%s%n", u.getUsername(), u.getPassword(), u.getRole(), u.getFullname());
             }

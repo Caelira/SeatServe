@@ -1,10 +1,11 @@
 package org.example.angelsburgerpos.DAO;
 
 import org.example.angelsburgerpos.model.Product;
-import java.io.InputStream;
+import org.example.angelsburgerpos.util.AppConfig;
+import org.example.angelsburgerpos.util.FileUtil;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class ProductDAO {
 
@@ -16,22 +17,12 @@ public class ProductDAO {
         }
         return null;
     }
+
     public List<Product> getAllProducts() {
         List<Product> products = new ArrayList<>();
-        InputStream is = getClass().getResourceAsStream("/org/example/angelsburgerpos/util/product-database.txt");
+        List<String> lines = FileUtil.readResource(AppConfig.PRODUCTS_RESOURCE);
 
-        if (is == null) {
-            System.out.println("ERROR: Could not find product-database.txt");
-            return products;
-        }
-
-        Scanner scanner = new Scanner(is);
-
-        while (scanner.hasNextLine()) {
-            String full = scanner.nextLine();
-            if (full.trim().isEmpty()) continue;
-
-
+        for (String full : lines) {
             String[] parts = full.split(",");
 
             if (parts.length >= 6) {
@@ -57,7 +48,6 @@ public class ProductDAO {
                 }
             }
         }
-        scanner.close();
         return products;
     }
 }

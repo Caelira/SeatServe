@@ -77,7 +77,6 @@ body {
     cursor: not-allowed;
 }
 
-/* --- CART VIEW STYLES (NEW) --- */
 .cart-header {
     display: flex;
     justify-content: space-between;

@@ -8,9 +8,6 @@ import java.util.*;
 
 public class InventoryManager {
 
-    private static final String INGREDIENTS_FILE = "src/main/resources/org/example/angelsburgerpos/util/ingredients.txt";
-    private static final String RECIPES_FILE = "/org/example/angelsburgerpos/util/recipes.txt";
-
     private static Map<String, Ingredient> ingredientMap = new HashMap<>();
     private static Map<String, Map<String, Integer>> recipeMap = new HashMap<>();
     private static Runnable refreshListener;
@@ -25,21 +22,12 @@ public class InventoryManager {
     }
 
     private static void loadIngredients() {
-        try {
-            File file = new File(INGREDIENTS_FILE);
-            if (file.exists()) {
-                Scanner scanner = new Scanner(file);
-                while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    String[] parts = line.split(",");
-                    if (parts.length == 4) {
-                        ingredientMap.put(parts[0], new Ingredient(parts[0], parts[1], Integer.parseInt(parts[2]), parts[3]));
-                    }
-                }
-                scanner.close();
+        List<String> lines = FileUtil.readLines(AppConfig.INGREDIENTS_FILE);
+        for (String line : lines) {
+            String[] parts = line.split(",");
+            if (parts.length == 4) {
+                ingredientMap.put(parts[0], new Ingredient(parts[0], parts[1], Integer.parseInt(parts[2]), parts[3]));
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
     }
 
@@ -54,29 +42,20 @@ public class InventoryManager {
     }
 
     private static void loadRecipes() {
-        try {
-            InputStream is = InventoryManager.class.getResourceAsStream(RECIPES_FILE);
-            if (is != null) {
-                Scanner scanner = new Scanner(is);
-                while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    String[] parts = line.split(",");
+        List<String> lines = FileUtil.readResource(AppConfig.RECIPES_RESOURCE);
+        for (String line : lines) {
+            String[] parts = line.split(",");
 
-                    String productId = parts[0];
-                    Map<String, Integer> ingredients = new HashMap<>();
+            String productId = parts[0];
+            Map<String, Integer> ingredients = new HashMap<>();
 
-                    for (int i = 1; i < parts.length; i++) {
-                        String[] ingQty = parts[i].split(":");
-                        if (ingQty.length == 2) {
-                            ingredients.put(ingQty[0], Integer.parseInt(ingQty[1]));
-                        }
-                    }
-                    recipeMap.put(productId, ingredients);
+            for (int i = 1; i < parts.length; i++) {
+                String[] ingQty = parts[i].split(":");
+                if (ingQty.length == 2) {
+                    ingredients.put(ingQty[0], Integer.parseInt(ingQty[1]));
                 }
-                scanner.close();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            recipeMap.put(productId, ingredients);
         }
     }
 
@@ -140,7 +119,6 @@ public class InventoryManager {
                         return false;
                     }
                 } else {
-                    System.out.println("Missing ingredients");
                     return false;
                 }
             }
@@ -150,7 +128,7 @@ public class InventoryManager {
 
     private static void saveInventory() {
         try {
-            File file = new File(INGREDIENTS_FILE);
+            File file = new File(AppConfig.INGREDIENTS_FILE);
             PrintWriter writer = new PrintWriter(file);
 
             List<Ingredient> list = new ArrayList<>(ingredientMap.values());

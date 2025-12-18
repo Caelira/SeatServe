@@ -9,12 +9,12 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.angelsburgerpos.model.User;
+import org.example.angelsburgerpos.util.AppConfig;
+import org.example.angelsburgerpos.util.FileUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class LoginController {
 
@@ -30,17 +30,13 @@ public class LoginController {
     }
 
     private void loadUsers() {
-        InputStream is = getClass().getResourceAsStream("/org/example/angelsburgerpos/util/users.txt");
-        if (is != null) {
-            Scanner scanner = new Scanner(is);
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                String[] parts = line.split(",");
-                if (parts.length == 4) {
-                    users.add(new User(parts[0], parts[1], parts[2], parts[3]));
-                }
+        List<String> lines = FileUtil.readLines(AppConfig.USERS_FILE);
+
+        for (String line : lines) {
+            String[] parts = line.split(",");
+            if (parts.length == 4) {
+                users.add(new User(parts[0], parts[1], parts[2], parts[3]));
             }
-            scanner.close();
         }
     }
 
@@ -63,9 +59,8 @@ public class LoginController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/dashboard-view.fxml"));
             Parent root = loader.load();
 
-
-             DashboardController dashboard = loader.getController();
-             dashboard.setUserInfo(user);
+            DashboardController dashboard = loader.getController();
+            dashboard.setUserInfo(user);
 
             Stage stage = (Stage) usernameField.getScene().getWindow();
             stage.setTitle("Angels Burger POS - Dashboard");
