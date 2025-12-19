@@ -1,5 +1,11 @@
 package org.example.angelsburgerpos.controller;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -7,23 +13,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.example.angelsburgerpos.model.CartItem;
 import org.example.angelsburgerpos.model.MobileOrder;
 import org.example.angelsburgerpos.model.Product;
 import org.example.angelsburgerpos.model.User;
 import org.example.angelsburgerpos.service.KioskServer;
-import org.example.angelsburgerpos.service.MyListener;
 import org.example.angelsburgerpos.service.ProductService;
 import org.example.angelsburgerpos.service.ProductServiceImp;
 import org.example.angelsburgerpos.service.TransactionService;
@@ -35,24 +38,47 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
-    @FXML private StackPane mainContentArea;
-    @FXML private AnchorPane menuSection;
-    @FXML private Label nameLabel;
-    @FXML private Label dateLabel;
-    @FXML private ImageView logo;
-    @FXML private Label roleLabel;
-    @FXML private Button mobileOrdersButton;
-    @FXML private Button employeesButton;
-    @FXML private Button logoutButton;
-    @FXML private FlowPane menuContainer;
-    @FXML private Label totalLabel;
-    @FXML private Button viewCartButton;
+    @FXML
+    private StackPane mainContentArea;
+    @FXML
+    private AnchorPane menuSection;
+    @FXML
+    private Label nameLabel;
+    @FXML
+    private Label dateLabel;
+    @FXML
+    private ImageView logo;
+    @FXML
+    private Label roleLabel;
+    @FXML
+    private Button mobileOrdersButton;
+    @FXML
+    private Button employeesButton;
+    @FXML
+    private Button logoutButton;
+    @FXML
+    private Label totalLabel;
+    @FXML
+    private Button viewCartButton;
+
+    @FXML
+    private TableView<Product> menuTable;
+    @FXML
+    private TableColumn<Product, String> colName;
+    @FXML
+    private TableColumn<Product, String> colCategory;
+    @FXML
+    private TableColumn<Product, Double> colPrice;
+    @FXML
+    private TableColumn<Product, Integer> colStock;
+    @FXML
+    private TableColumn<Product, Void> colAction;
 
     private KioskServer kioskServer;
     private ProductService productService;
     private ObservableList<CartItem> cartList = FXCollections.observableArrayList();
     private ObservableList<MobileOrder> pendingOrders = FXCollections.observableArrayList();
-    private MyListener myListener;
+    private ObservableList<Product> productList = FXCollections.observableArrayList();
     private User user;
 
     public DashboardController() {
@@ -61,9 +87,8 @@ public class DashboardController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        myListener = this::addToCart;
-
-        loadProducts("Burger");
+        initTable();
+        loadProducts("ALL");
         initClock();
         startKioskServer();
         updateMobileOrderNotification();
@@ -71,141 +96,101 @@ public class DashboardController implements Initializable {
         if (menuSection != null) menuSection.setVisible(true);
     }
 
-    private void loadView(String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent view = loader.load();
+    private void initTable() {
+        colName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
+        colCategory.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCategory()));
+        colPrice.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getPrice()).asObject());
+        colStock.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getStock()).asObject());
 
-            Object controller = loader.getController();
-
-            if (controller instanceof MobileOrdersController) {
-                ((MobileOrdersController) controller).setDashboard(this);
-                ((MobileOrdersController) controller).setOrderList(pendingOrders);
+        colAction.setCellFactory(param -> new TableCell<>() {
+            private final Button btn = new Button("Add");
+            {
+                btn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+                btn.setOnAction(event -> {
+                    Product p = getTableView().getItems().get(getIndex());
+                    addToCart(p);
+                });
             }
 
-            if (menuSection != null) menuSection.setVisible(false);
-
-            mainContentArea.getChildren().clear();
-            mainContentArea.getChildren().add(view);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    Product p = getTableView().getItems().get(getIndex());
+                    btn.setDisable(p.getStock() <= 0);
+                    setGraphic(btn);
+                }
+            }
+        });
+        menuTable.setItems(productList);
     }
 
-    @FXML
-    private void menuButtonClicked() {
-        mainContentArea.getChildren().clear();
-        if (menuSection != null) {
-            mainContentArea.getChildren().add(menuSection);
-            menuSection.setVisible(true);
-        }
-    }
+    private void loadProducts(String category) {
+        productList.clear();
+        List<Product> products = productService.getProducts();
 
-    @FXML
-    private void inventoryClicked() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/inventory-view.fxml"));
-            Parent view = loader.load();
-            org.example.angelsburgerpos.controller.InventoryController controller = loader.getController();
-            controller.setUser(this.user);
+        for (Product product : products) {
+            if (category.equals("ALL") || product.getCategory().equalsIgnoreCase(category)) {
+                int realStock = org.example.angelsburgerpos.util.InventoryManager.calculateMaxStock(
+                        product.getId(),
+                        new ArrayList<>(cartList)
+                );
 
-            mainContentArea.getChildren().clear();
-            mainContentArea.getChildren().add(view);
-            if (menuSection != null) menuSection.setVisible(false);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void reportsClicked() {
-        loadView("/org/example/angelsburgerpos/sales-view.fxml");
-    }
-
-    @FXML
-    private void employeesClicked() {
-        loadView("/org/example/angelsburgerpos/employees-view.fxml");
-    }
-
-    @FXML
-    private void viewMobileOrdersClicked() {
-        loadView("/org/example/angelsburgerpos/mobile-orders-view.fxml");
-    }
-
-    private void startKioskServer() {
-        try {
-            kioskServer = new KioskServer(productService, this);
-            kioskServer.startServer();
-        } catch (Exception e) {
-            System.out.println("Failed to start server. Error: " + e.getMessage());
-        }
-    }
-
-    public List<MobileOrder> getPendingOrders() {
-        return pendingOrders;
-    }
-
-    public void addPendingOrder(MobileOrder order) {
-        pendingOrders.add(order);
-        updateMobileOrderNotification();
-
-    }
-
-    private void updateMobileOrderNotification() {
-        if (mobileOrdersButton != null) {
-            mobileOrdersButton.setText("Mobile Orders (" + pendingOrders.size() + ")");
-            if (!pendingOrders.isEmpty()) {
-                mobileOrdersButton.setStyle("-fx-background-color: #ff9800; -fx-text-fill: white;");
-            } else {
-                mobileOrdersButton.setStyle("");
+                product.setStock(realStock);
+                productList.add(product);
             }
         }
+        menuTable.refresh();
     }
 
-    public void finalizeMobileOrder(MobileOrder order) {
-        List<CartItem> itemsToDeduct = new ArrayList<>();
-        double amount = 0.0;
-
-        for (var mobileItem : order.getItems()) {
-            Product p = productService.findById(mobileItem.productId);
-            if (p != null) {
-                CartItem item = new CartItem(p, mobileItem.quantity);
-                amount += item.getTotal();
-                itemsToDeduct.add(item);
-            }
-        }
-
-        if (!itemsToDeduct.isEmpty()) {
-            TransactionService.processTransaction(itemsToDeduct, amount, amount);
-            System.out.println("Mobile Order Finalized.");
-        }
+    @FXML
+    private void filterBurgers() {
+        loadProducts("Burger");
     }
 
-    private void initClock() {
-        javafx.animation.Timeline clock = new javafx.animation.Timeline(new javafx.animation.KeyFrame(javafx.util.Duration.ZERO, e -> {
-            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss");
-            dateLabel.setText(java.time.LocalDateTime.now().format(formatter));
-        }), new javafx.animation.KeyFrame(javafx.util.Duration.seconds(1)));
+    @FXML
+    private void filterSandwiches() {
+        loadProducts("Sandwich");
+    }
 
-        clock.setCycleCount(javafx.animation.Animation.INDEFINITE);
-        clock.play();
+    @FXML
+    private void filterDrinks() {
+        loadProducts("Drink");
+    }
+
+    @FXML
+    private void filterAll() {
+        loadProducts("ALL");
     }
 
     private void addToCart(Product product) {
-        boolean found = false;
-        for (CartItem item : cartList) {
-            if (item.getName().equals(product.getName())) {
-                item.increaseQuantity();
-                found = true;
-                break;
+        int remainingStock = org.example.angelsburgerpos.util.InventoryManager.calculateMaxStock(product.getId(), new ArrayList<>(cartList));
+
+        if (remainingStock > 0) {
+            boolean found = false;
+            for (CartItem item : cartList) {
+                if (item.getName().equals(product.getName())) {
+                    item.increaseQuantity();
+                    found = true;
+                    break;
+                }
             }
+            if (!found) {
+                cartList.add(new CartItem(product, 1));
+            }
+            updateFooter();
+        } else {
+            showAlert("Out of Stock", "Not enough ingredients.");
         }
-        if (!found) {
-            cartList.add(new CartItem(product, 1));
-        }
-        updateFooter();
+    }
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     private void updateFooter() {
@@ -224,55 +209,119 @@ public class DashboardController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/cart-popup-view.fxml"));
             Parent root = loader.load();
-
             CartController cartController = loader.getController();
             cartController.setCartList(this.cartList);
-
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setTitle("Current Order");
             stage.setScene(new Scene(root));
             stage.setOnHidden(e -> updateFooter());
-
             stage.showAndWait();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @FXML
-    private void filterBurgers() {
-        loadProducts("Burger");
+    private void menuButtonClicked() {
+        mainContentArea.getChildren().clear();
+        if (menuSection != null) {
+            mainContentArea.getChildren().add(menuSection);
+            menuSection.setVisible(true);
+        }
     }
 
     @FXML
-    private void filterSandwiches() {
-        loadProducts("Sandwich");
+    private void inventoryClicked() {
+        loadView("/org/example/angelsburgerpos/inventory-view.fxml");
     }
 
     @FXML
-    private void filterDrinks() {
-        loadProducts("Drink");
+    private void reportsClicked() {
+        loadView("/org/example/angelsburgerpos/sales-view.fxml");
     }
 
-    private void loadProducts(String category) {
-        menuContainer.getChildren().clear();
-        List<Product> products = productService.getProducts();
+    @FXML
+    private void employeesClicked() {
+        loadView("/org/example/angelsburgerpos/employees-view.fxml");
+    }
 
-        for (Product product : products) {
-            if (product.getCategory().equalsIgnoreCase(category)) {
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/product-card-view.fxml"));
-                    AnchorPane cardBox = loader.load();
-                    ProductCardController cardController = loader.getController();
-                    cardController.setData(product, myListener);
-                    menuContainer.getChildren().add(cardBox);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    @FXML
+    private void viewMobileOrdersClicked() {
+        loadView("/org/example/angelsburgerpos/mobile-orders-view.fxml");
+    }
+
+    private void loadView(String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent view = loader.load();
+            Object controller = loader.getController();
+
+            if (controller instanceof MobileOrdersController) {
+                ((MobileOrdersController) controller).setDashboard(this);
+                ((MobileOrdersController) controller).setOrderList(pendingOrders);
+            }
+            if (controller instanceof InventoryController) {
+                ((InventoryController) controller).setUser(this.user);
+            }
+            if (menuSection != null) menuSection.setVisible(false);
+            mainContentArea.getChildren().clear();
+            mainContentArea.getChildren().add(view);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startKioskServer() {
+        try {
+            kioskServer = new KioskServer(productService, this);
+            kioskServer.startServer();
+        } catch (Exception e) {
+            System.out.println("Failed to start server: " + e.getMessage());
+        }
+    }
+
+    public List<MobileOrder> getPendingOrders() {
+        return pendingOrders;
+    }
+
+    public void addPendingOrder(MobileOrder order) {
+        pendingOrders.add(order);
+        updateMobileOrderNotification();
+    }
+
+    public void finalizeMobileOrder(MobileOrder order) {
+        List<CartItem> itemsToDeduct = new ArrayList<>();
+        double amount = 0.0;
+        for (var mobileItem : order.getItems()) {
+            Product p = productService.findById(mobileItem.productId);
+            if (p != null) {
+                CartItem item = new CartItem(p, mobileItem.quantity);
+                amount += item.getTotal();
+                itemsToDeduct.add(item);
             }
         }
+        if (!itemsToDeduct.isEmpty()) {
+            TransactionService.processTransaction(itemsToDeduct, amount, amount);
+        }
+    }
+
+    private void updateMobileOrderNotification() {
+        if (mobileOrdersButton != null) {
+            mobileOrdersButton.setText("Mobile Orders (" + pendingOrders.size() + ")");
+            if (!pendingOrders.isEmpty())
+                mobileOrdersButton.setStyle("-fx-background-color: #ff9800; -fx-text-fill: white;");
+            else mobileOrdersButton.setStyle("");
+        }
+    }
+
+    private void initClock() {
+        Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss");
+            dateLabel.setText(java.time.LocalDateTime.now().format(formatter));
+        }), new KeyFrame(Duration.seconds(1)));
+        clock.setCycleCount(Animation.INDEFINITE);
+        clock.play();
     }
 
     @FXML
@@ -289,31 +338,8 @@ public class DashboardController implements Initializable {
         }
     }
 
-    private void setLogo(User user) {
-        try {
-            String path = "/org/example/angelsburgerpos/images/logo.jpg";
-            if (user.getFullname().equalsIgnoreCase("James Agmata".trim())) {
-                path = "/org/example/angelsburgerpos/images/james.png";
-            }
-            if (user.getFullname().equalsIgnoreCase("Rowena Acabado".trim())) {
-                path = "/org/example/angelsburgerpos/images/rowena.jpg";
-            }
-            if (user.getFullname().equalsIgnoreCase("Ayende".trim())) {
-                path = "/org/example/angelsburgerpos/images/gwyn.jpg";
-            }
-            if (user.getFullname().equalsIgnoreCase("James Agmata".trim())) {
-                path = "/org/example/angelsburgerpos/images/james.png";
-            }
-            if (getClass().getResource(path) != null) {
-                String imagePath = getClass().getResource(path).toExternalForm();
-                logo.setImage(new Image(imagePath));
-                double radius = Math.min(logo.getFitWidth(), logo.getFitHeight()) / 2;
-                Circle clip = new Circle(logo.getFitWidth() / 2, logo.getFitHeight() / 2, radius);
-                logo.setClip(clip);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void stopServer() {
+        if (kioskServer != null) kioskServer.stop();
     }
 
     public void setUserInfo(User user) {
@@ -321,12 +347,26 @@ public class DashboardController implements Initializable {
         nameLabel.setText(user.getFullname());
         roleLabel.setText(user.getRole());
         setLogo(user);
-        if (user.getRole().equalsIgnoreCase("Cashier")) {
-            employeesButton.setVisible(false);
-        }
+        if (user.getRole().equalsIgnoreCase("Cashier")) employeesButton.setVisible(false);
     }
 
-    public void stopServer() {
-        if (kioskServer != null) kioskServer.stop();
+    private void setLogo(User user) {
+        try {
+            String path = "/org/example/angelsburgerpos/images/logo.jpg";
+            if (user.getFullname().equalsIgnoreCase("James Agmata"))
+                path = "/org/example/angelsburgerpos/images/james.png";
+            else if (user.getFullname().equalsIgnoreCase("Rowena Acabado"))
+                path = "/org/example/angelsburgerpos/images/rowena.jpg";
+            else if (user.getFullname().equalsIgnoreCase("Ayende"))
+                path = "/org/example/angelsburgerpos/images/gwyn.jpg";
+            if (getClass().getResource(path) != null) {
+                logo.setImage(new Image(getClass().getResource(path).toExternalForm()));
+                double radius = Math.min(logo.getFitWidth(), logo.getFitHeight()) / 2;
+                Circle clip = new Circle(logo.getFitWidth() / 2, logo.getFitHeight() / 2, radius);
+                logo.setClip(clip);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

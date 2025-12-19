@@ -33,7 +33,7 @@ public class Ingredient {
         return unit;
     }
 
-    public void reduceStock(int quantity){
+    public void reduceStock(int quantity) {
         stock -= quantity;
     }
 }

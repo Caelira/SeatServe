@@ -10,9 +10,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.example.angelsburgerpos.model.SaleRecord;
-import org.example.angelsburgerpos.util.AppConfig;
 import org.example.angelsburgerpos.util.FileUtil;
 
+import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -28,21 +28,21 @@ public class SalesController implements Initializable {
     @FXML private TableColumn<SaleRecord, String> colTime;
     @FXML private TableColumn<SaleRecord, Double> colAmount;
     @FXML private Label totalSalesLabel;
-
     @FXML private ComboBox<String> filterCombo;
 
     private ObservableList<SaleRecord> masterList = FXCollections.observableArrayList();
+    private static final String LOG_DIR = "sales_logs/";
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
         colTime.setCellValueFactory(new PropertyValueFactory<>("time"));
         colAmount.setCellValueFactory(new PropertyValueFactory<>("amount"));
+
         filterCombo.setItems(FXCollections.observableArrayList(
                 "All Time", "Daily (Today)", "Weekly (This Week)", "Monthly (This Month)", "Yearly (This Year)"
         ));
         filterCombo.getSelectionModel().selectFirst();
-
         filterCombo.setOnAction(e -> filterData());
 
         loadSalesData();
@@ -50,18 +50,26 @@ public class SalesController implements Initializable {
 
     private void loadSalesData() {
         masterList.clear();
-        List<String> lines = FileUtil.readLines(AppConfig.SALES_LOG_FILE);
+        File dir = new File(LOG_DIR);
 
-        for (String line : lines) {
-            String[] parts = line.split(",");
-            if (parts.length == 3) {
-                try {
-                    String date = parts[0];
-                    String time = parts[1];
-                    double amount = Double.parseDouble(parts[2]);
+        if (dir.exists() && dir.isDirectory()) {
+            File[] files = dir.listFiles((d, name) -> name.startsWith("sales_") && name.endsWith(".csv"));
 
-                    masterList.add(new SaleRecord(date, time, amount));
-                } catch (NumberFormatException e) {
+            if (files != null) {
+                for (File file : files) {
+                    List<String> lines = FileUtil.readLines(file.getPath());
+                    for (String line : lines) {
+                        String[] parts = line.split(",");
+                        if (parts.length == 3) {
+                            try {
+                                String date = parts[0];
+                                String time = parts[1];
+                                double amount = Double.parseDouble(parts[2]);
+                                masterList.add(new SaleRecord(date, time, amount));
+                            } catch (NumberFormatException e) {
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -79,44 +87,31 @@ public class SalesController implements Initializable {
 
         for (SaleRecord record : masterList) {
             boolean include = false;
-
             try {
                 LocalDate recordDate = LocalDate.parse(record.getDate(), formatter);
 
-                if (selected.startsWith("All")) {
-                    include = true;
-                }
+                if (selected.startsWith("All")) include = true;
                 else if (selected.startsWith("Daily")) {
                     if (recordDate.isEqual(today)) include = true;
                 }
                 else if (selected.startsWith("Weekly")) {
                     int currentWeek = today.get(weekFields.weekOfWeekBasedYear());
                     int recordWeek = recordDate.get(weekFields.weekOfWeekBasedYear());
-
-                    if (recordDate.getYear() == today.getYear() && currentWeek == recordWeek) {
-                        include = true;
-                    }
+                    if (recordDate.getYear() == today.getYear() && currentWeek == recordWeek) include = true;
                 }
                 else if (selected.startsWith("Monthly")) {
-                    if (recordDate.getYear() == today.getYear() &&
-                            recordDate.getMonth() == today.getMonth()) {
-                        include = true;
-                    }
+                    if (recordDate.getYear() == today.getYear() && recordDate.getMonth() == today.getMonth()) include = true;
                 }
                 else if (selected.startsWith("Yearly")) {
                     if (recordDate.getYear() == today.getYear()) include = true;
                 }
-
-            } catch (Exception e) {
-                System.out.println("Date parse error for: " + record.getDate());
-            }
+            } catch (Exception e) { }
 
             if (include) {
                 filteredList.add(record);
                 grandTotal += record.getAmount();
             }
         }
-
         salesTable.setItems(filteredList);
         totalSalesLabel.setText("Total Revenue: P " + String.format("%.2f", grandTotal));
     }

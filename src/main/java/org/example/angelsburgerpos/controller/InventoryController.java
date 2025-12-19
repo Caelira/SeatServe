@@ -18,16 +18,16 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class InventoryController implements Initializable {
-    @FXML private Button addIngBtn;
-    @FXML private Button reduceBtn;
-    @FXML private Button deleteBtn;
-    @FXML private TableView<Ingredient> inventoryTable;
-    @FXML private TableColumn<Ingredient, String> colId;
-    @FXML private TableColumn<Ingredient, String> colName;
-    @FXML private TableColumn<Ingredient, Integer> colStock;
-    @FXML private TableColumn<Ingredient, String> colUnit;
-    @FXML private TextField restockInput;
-    @FXML private Button restockBtn;
+    @FXML
+    private Button addIngBtn, reduceBtn, deleteBtn, restockBtn;
+    @FXML
+    private TableView<Ingredient> inventoryTable;
+    @FXML
+    private TableColumn<Ingredient, String> colId, colName, colUnit;
+    @FXML
+    private TableColumn<Ingredient, Integer> colStock;
+    @FXML
+    private TextField restockInput;
 
     private ObservableList<Ingredient> ingredientList = FXCollections.observableArrayList();
 
@@ -45,21 +45,40 @@ public class InventoryController implements Initializable {
     public void setUser(User user) {
         if (user != null && !user.getRole().equalsIgnoreCase("Admin")) {
             restockInput.setDisable(true);
-            restockInput.setPromptText("Admin Access Only");
             restockBtn.setDisable(true);
-            restockBtn.setVisible(false);
-
-            if(addIngBtn != null) addIngBtn.setDisable(true);
-            if(deleteBtn != null) deleteBtn.setDisable(true);
-            if(reduceBtn != null) reduceBtn.setDisable(true);
+            addIngBtn.setDisable(true);
+            deleteBtn.setDisable(true);
+            reduceBtn.setDisable(true);
         }
     }
 
     private void loadIngredients() {
         ingredientList.clear();
         ingredientList.addAll(InventoryManager.getAllIngredients());
+
         inventoryTable.setItems(ingredientList);
         inventoryTable.refresh();
+    }
+
+    @FXML
+    public void setDeleteBtn() {
+        Ingredient selected = inventoryTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("No Selection", "Please select an ingredient");
+            return;
+        }
+
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Archive Ingredient");
+        dialog.setHeaderText("Archiving: " + selected.getName());
+        dialog.setContentText("Reason for archive:");
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(reason -> {
+            if (reason.trim().isEmpty()) reason = "No Reason Given";
+            InventoryManager.archiveIngredient(selected.getId(), reason);
+            loadIngredients();
+        });
     }
 
     @FXML
@@ -76,57 +95,20 @@ public class InventoryController implements Initializable {
         Ingredient selected = inventoryTable.getSelectionModel().getSelectedItem();
         String qtyText = restockInput.getText();
 
-        if (selected == null) {
-            showAlert("No Selection", "Please select an ingredient first.");
-            return;
-        }
-        if (qtyText.isEmpty()) {
-            showAlert("Input Error", "Please enter a quantity.");
-            return;
-        }
+        if (selected == null || qtyText.isEmpty()) return;
 
         try {
-            int qtyToChange = Integer.parseInt(qtyText);
-            if (qtyToChange <= 0) {
-                showAlert("Input Error", "Please enter a positive number.");
+            int qty = Integer.parseInt(qtyText);
+            if (qty <= 0) {
+                showAlert("Error", "Enter positive number");
                 return;
             }
-
-            int newStock = selected.getStock() + (qtyToChange * multiplier);
-            if (newStock < 0) {
-                showAlert("Stock Error", "Stock cannot go below zero.");
-                return;
-            }
-
-            selected.setStock(newStock);
+            selected.setStock(selected.getStock() + (qty * multiplier));
             InventoryManager.reduceStock(new ArrayList<>());
             restockInput.clear();
             inventoryTable.refresh();
-
         } catch (NumberFormatException e) {
-            showAlert("Invalid Number", "Please enter a valid integer.");
-        }
-    }
-
-    @FXML
-    public void setDeleteBtn() {
-        Ingredient selected = inventoryTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert("No Selection", "Please select an ingredient to delete.");
-            return;
-        }
-
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Ingredient");
-        alert.setHeaderText("Delete " + selected.getName() + "?");
-        alert.setContentText("This cannot be undone.");
-
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-
-            InventoryManager.deleteIngredient(selected.getId());
-
-            loadIngredients();
+            showAlert("Error", "Invalid Number");
         }
     }
 
@@ -157,7 +139,6 @@ public class InventoryController implements Initializable {
         grid.add(unitField, 1, 1);
         grid.add(new Label("Stock:"), 0, 2);
         grid.add(stockField, 1, 2);
-
         dialog.getDialogPane().setContent(grid);
 
         dialog.setResultConverter(dialogButton -> {
@@ -178,7 +159,6 @@ public class InventoryController implements Initializable {
         Optional<Ingredient> result = dialog.showAndWait();
         result.ifPresent(newIngredient -> {
             InventoryManager.addIngredient(newIngredient);
-
             loadIngredients();
         });
     }
@@ -193,7 +173,6 @@ public class InventoryController implements Initializable {
 
     @FXML
     private void closeWindow() {
-        Stage stage = (Stage) inventoryTable.getScene().getWindow();
-        stage.close();
+        ((Stage) inventoryTable.getScene().getWindow()).close();
     }
 }

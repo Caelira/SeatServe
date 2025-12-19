@@ -34,10 +34,7 @@ public class CartController {
     private void onPayClicked() {
         ObservableList<CartItem> items = cartTable.getItems();
 
-        if (items.isEmpty()) {
-            System.out.println("Cart is empty!");
-            return;
-        }
+        if (items.isEmpty()) return;
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/checkout-view.fxml"));
