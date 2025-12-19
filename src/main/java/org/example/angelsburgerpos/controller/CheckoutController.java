@@ -69,6 +69,7 @@ public class CheckoutController {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Receipt");
         stage.setScene(new Scene(root));
+        stage.setResizable(false);
         stage.show();
     }
 

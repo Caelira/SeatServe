@@ -18,18 +18,18 @@ import java.util.Map;
 
 public class KioskServer {
 
+    private static int orderCounter = 1;
     private final ProductService productService;
     private final DashboardController dashboard;
     private final Gson gson = new Gson();
     private Javalin app;
-    private static int orderCounter = 1;
 
     public KioskServer(ProductService productService, DashboardController dashboard) {
         this.productService = productService;
         this.dashboard = dashboard;
     }
 
-    private boolean checkAvailability(Product p){
+    private boolean checkAvailability(Product p) {
         return InventoryManager.canMakeProduct(p.getId(), 1);
     }
 
@@ -43,7 +43,7 @@ public class KioskServer {
 
             List<Map<String, Object>> menuResponse = new ArrayList<>();
 
-            for(Product p : allProducts){
+            for (Product p : allProducts) {
                 boolean available = checkAvailability(p);
 
                 menuResponse.add(Map.of(
@@ -61,7 +61,8 @@ public class KioskServer {
         app.post("/api/order", ctx -> {
             String body = ctx.body();
             try {
-                List<OrderRequest> items = gson.fromJson(body, new TypeToken<List<OrderRequest>>(){}.getType());
+                List<OrderRequest> items = gson.fromJson(body, new TypeToken<List<OrderRequest>>() {
+                }.getType());
 
                 String shortId = String.format("%03d", orderCounter++);
 
@@ -74,7 +75,7 @@ public class KioskServer {
                 ctx.status(201).result(jsonResponse).contentType("application/json");
 
             } catch (JsonSyntaxException e) {
-                System.out.println("Error: " +  e.getMessage());
+                System.out.println("Error: " + e.getMessage());
                 ctx.status(400).result("Error processing order. Please try again.");
             }
         });
@@ -83,9 +84,9 @@ public class KioskServer {
             String id = ctx.pathParam("id");
             String status = "PENDING";
 
-            if(dashboard.getPendingOrders() != null){
-                for(MobileOrder o : dashboard.getPendingOrders()){
-                    if(o.getOrderId().equals(id)){
+            if (dashboard.getPendingOrders() != null) {
+                for (MobileOrder o : dashboard.getPendingOrders()) {
+                    if (o.getOrderId().equals(id)) {
                         status = o.getStatus();
                         break;
                     }
@@ -95,7 +96,7 @@ public class KioskServer {
         });
     }
 
-    public void stop () {
+    public void stop() {
         if (app != null) {
             app.stop();
         }

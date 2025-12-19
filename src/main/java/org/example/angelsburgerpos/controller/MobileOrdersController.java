@@ -18,8 +18,10 @@ import java.util.ResourceBundle;
 
 public class MobileOrdersController implements Initializable {
 
-    @FXML private FlowPane acceptedContainer;
-    @FXML private TextField codeField;
+    @FXML
+    private FlowPane acceptedContainer;
+    @FXML
+    private TextField codeField;
 
     private ObservableList<MobileOrder> orderList;
     private DashboardController dashboard;
@@ -63,7 +65,9 @@ public class MobileOrdersController implements Initializable {
     @FXML
     private void confirmPayment() {
         String code = codeField.getText().trim();
-        if (code.isEmpty()) return;
+        if (code.isEmpty()) {
+            return;
+        }
 
         for (MobileOrder order : orderList) {
             if (order.getOrderId().equals(code)) {

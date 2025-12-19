@@ -1,8 +1,5 @@
-.imageCard{
-
-    -fx-border-radius: 20px black;
-}
 
 .productCard{
     -fx-border-color: 1px solid black;
+    -fx-start-margin: 10px;
 }
