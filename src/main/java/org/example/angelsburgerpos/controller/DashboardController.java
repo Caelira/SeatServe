@@ -17,6 +17,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
@@ -51,6 +52,8 @@ public class DashboardController implements Initializable {
     @FXML
     private Label roleLabel;
     @FXML
+    private Button menuButton;
+    @FXML
     private Button mobileOrdersButton;
     @FXML
     private Button employeesButton;
@@ -60,7 +63,8 @@ public class DashboardController implements Initializable {
     private Label totalLabel;
     @FXML
     private Button viewCartButton;
-
+    @FXML
+    private Button warningButtonForAdmin;
     @FXML
     private TableView<Product> menuTable;
     @FXML
@@ -73,7 +77,8 @@ public class DashboardController implements Initializable {
     private TableColumn<Product, Integer> colStock;
     @FXML
     private TableColumn<Product, Void> colAction;
-
+    @FXML
+    private Button warningButton;
     private KioskServer kioskServer;
     private ProductService productService;
     private ObservableList<CartItem> cartList = FXCollections.observableArrayList();
@@ -92,7 +97,7 @@ public class DashboardController implements Initializable {
         initClock();
         startKioskServer();
         updateMobileOrderNotification();
-
+        checkLowStock();
         if (menuSection != null) menuSection.setVisible(true);
     }
 
@@ -103,12 +108,22 @@ public class DashboardController implements Initializable {
         colStock.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getStock()).asObject());
 
         colAction.setCellFactory(param -> new TableCell<>() {
-            private final Button btn = new Button("Add");
+            private final Button addBtn = new Button("Add");
+            private final Button custBtn = new Button("Cust.");
+            private final HBox pane = new HBox(5, addBtn, custBtn);
+
             {
-                btn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
-                btn.setOnAction(event -> {
+                addBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+                custBtn.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
+
+                addBtn.setOnAction(event -> {
                     Product p = getTableView().getItems().get(getIndex());
                     addToCart(p);
+                });
+
+                custBtn.setOnAction(event -> {
+                    Product p = getTableView().getItems().get(getIndex());
+                    openCustomizeWindow(p);
                 });
             }
 
@@ -119,12 +134,40 @@ public class DashboardController implements Initializable {
                     setGraphic(null);
                 } else {
                     Product p = getTableView().getItems().get(getIndex());
-                    btn.setDisable(p.getStock() <= 0);
-                    setGraphic(btn);
+
+                    boolean available = p.getStock() > 0;
+                    addBtn.setDisable(!available);
+                    custBtn.setDisable(!available);
+
+                    setGraphic(pane);
                 }
             }
         });
+
         menuTable.setItems(productList);
+    }
+
+    private void openCustomizeWindow(Product product) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/customize-view.fxml"));
+            Parent root = loader.load();
+
+            CustomizeController controller = loader.getController();
+
+            controller.setData(product, (customItem) -> {
+                cartList.add(customItem);
+                updateFooter();
+                refreshStockCounts(); // Recalculate stock immediately
+            });
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Customize " + product.getName());
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadProducts(String category) {
@@ -181,10 +224,24 @@ public class DashboardController implements Initializable {
                 cartList.add(new CartItem(product, 1));
             }
             updateFooter();
+            refreshStockCounts();
+
         } else {
             showAlert("Out of Stock", "Not enough ingredients.");
         }
     }
+
+    private void refreshStockCounts() {
+        for (Product p : productList) {
+            int realStock = org.example.angelsburgerpos.util.InventoryManager.calculateMaxStock(
+                    p.getId(),
+                    new ArrayList<>(cartList)
+            );
+            p.setStock(realStock);
+        }
+        menuTable.refresh();
+    }
+
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
@@ -204,23 +261,6 @@ public class DashboardController implements Initializable {
         viewCartButton.setText("VIEW CART (" + count + ")");
     }
 
-    @FXML
-    private void viewCartClicked() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/cart-popup-view.fxml"));
-            Parent root = loader.load();
-            CartController cartController = loader.getController();
-            cartController.setCartList(this.cartList);
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Current Order");
-            stage.setScene(new Scene(root));
-            stage.setOnHidden(e -> updateFooter());
-            stage.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     @FXML
     private void menuButtonClicked() {
@@ -291,19 +331,7 @@ public class DashboardController implements Initializable {
     }
 
     public void finalizeMobileOrder(MobileOrder order) {
-        List<CartItem> itemsToDeduct = new ArrayList<>();
-        double amount = 0.0;
-        for (var mobileItem : order.getItems()) {
-            Product p = productService.findById(mobileItem.productId);
-            if (p != null) {
-                CartItem item = new CartItem(p, mobileItem.quantity);
-                amount += item.getTotal();
-                itemsToDeduct.add(item);
-            }
-        }
-        if (!itemsToDeduct.isEmpty()) {
-            TransactionService.processTransaction(itemsToDeduct, amount, amount);
-        }
+        checkLowStock();
     }
 
     private void updateMobileOrderNotification() {
@@ -347,7 +375,13 @@ public class DashboardController implements Initializable {
         nameLabel.setText(user.getFullname());
         roleLabel.setText(user.getRole());
         setLogo(user);
-        if (user.getRole().equalsIgnoreCase("Cashier")) employeesButton.setVisible(false);
+        if (user.getRole().equalsIgnoreCase("Cashier/cook")) {
+            employeesButton.setVisible(false);
+            warningButtonForAdmin.setVisible(false);
+        }else if(user.getRole().equalsIgnoreCase("admin")){
+            mobileOrdersButton.setVisible(false);
+            menuButton.setVisible(false);
+        }
     }
 
     private void setLogo(User user) {
@@ -366,6 +400,69 @@ public class DashboardController implements Initializable {
                 logo.setClip(clip);
             }
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void checkLowStock() {
+        boolean hasLowStock = false;
+        int threshold = 20;
+
+        for (org.example.angelsburgerpos.model.Ingredient ing : org.example.angelsburgerpos.util.InventoryManager.getAllIngredients()) {
+            if (ing.getStock() <= threshold) {
+                hasLowStock = true;
+                break;
+            }
+        }
+
+        //hide or show if there is low stock
+        if (warningButton != null) {
+            warningButton.setVisible(hasLowStock);
+            warningButton.setManaged(hasLowStock);
+        }
+    }
+
+    @FXML
+    private void showLowStockView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/low-stock-view.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Low Stock Warning");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    @FXML
+    private void viewCartClicked() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/cart-popup-view.fxml"));
+            Parent root = loader.load();
+
+            CartController cartController = loader.getController();
+            cartController.setCartList(this.cartList);
+
+            cartController.setUser(this.user);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Current Order");
+            stage.setScene(new Scene(root));
+            stage.setOnHidden(e -> updateFooter());
+            stage.showAndWait();
+
+            checkLowStock();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

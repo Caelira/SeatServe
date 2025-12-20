@@ -39,6 +39,7 @@
             <Button fx:id="menuButton" layoutX="29.0" layoutY="288.0" mnemonicParsing="false" onAction="#menuButtonClicked" prefHeight="29.0" prefWidth="114.0" text="Manual Order" />
             <ImageView fx:id="logo" fitHeight="150.0" fitWidth="150.0" layoutX="12.0" layoutY="61.0" pickOnBounds="true" preserveRatio="false" />
             <Button fx:id="mobileOrdersButton" layoutX="30.0" layoutY="245.0" mnemonicParsing="false" onAction="#viewMobileOrdersClicked" prefHeight="29.0" prefWidth="114.0" text="Mobile Orders" />
+            <Button fx:id="warningButtonForAdmin" layoutX="26.0" layoutY="480.0" onAction="#showLowStockView" prefHeight="40.0" prefWidth="120.0" text="LOW ON STOCK" />
          </children>
       </AnchorPane>
    </left>
@@ -57,6 +58,7 @@
                                     <Button fx:id="burgersButton" onAction="#filterBurgers" prefHeight="40.0" prefWidth="120.0" text="Burgers" />
                                     <Button fx:id="sandwichesButton" onAction="#filterSandwiches" prefHeight="40.0" prefWidth="120.0" text="Sandwiches" />
                                     <Button fx:id="drinksButton" onAction="#filterDrinks" prefHeight="40.0" prefWidth="120.0" text="Drinks" />
+                                    <Button fx:id="warningButton" layoutX="390.0" layoutY="10.0" onAction="#showLowStockView" prefHeight="40.0" prefWidth="120.0" text="LOW ON STOCK" />
                                  </children>
                               </HBox>
                            </children>

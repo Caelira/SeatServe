@@ -1,5 +1,5 @@
 admin,admin123,Admin,Prince Olaguera
-cashier1,1234,Cashier,Rowena Acabado
-cashier2,1234,Cashier,James Agmata
-cashier3,1234,Cashier,Japhet Mondigo
-cashier4,1234,Cashier,Ayende
+cashier1,1234,Cashier/Cook,Rowena Acabado
+cashier2,1234,Cashier/Cook,James Agmata
+cashier3,1234,Cashier/Cook,Japhet Mondigo
+cashier4,1234,Cashier/Cook,Ayende

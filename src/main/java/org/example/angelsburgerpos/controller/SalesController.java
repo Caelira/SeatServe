@@ -10,6 +10,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.example.angelsburgerpos.model.SaleRecord;
+import org.example.angelsburgerpos.util.AppConfig;
 import org.example.angelsburgerpos.util.FileUtil;
 
 import java.io.File;
@@ -27,22 +28,25 @@ public class SalesController implements Initializable {
     @FXML private TableColumn<SaleRecord, String> colDate;
     @FXML private TableColumn<SaleRecord, String> colTime;
     @FXML private TableColumn<SaleRecord, Double> colAmount;
+    @FXML private TableColumn<SaleRecord, String> colCashier;
+
     @FXML private Label totalSalesLabel;
     @FXML private ComboBox<String> filterCombo;
 
     private ObservableList<SaleRecord> masterList = FXCollections.observableArrayList();
-    private static final String LOG_DIR = "sales_logs/";
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
         colTime.setCellValueFactory(new PropertyValueFactory<>("time"));
         colAmount.setCellValueFactory(new PropertyValueFactory<>("amount"));
+        colCashier.setCellValueFactory(new PropertyValueFactory<>("cashier"));
 
         filterCombo.setItems(FXCollections.observableArrayList(
-                "All Time", "Daily (Today)", "Weekly (This Week)", "Monthly (This Month)", "Yearly (This Year)"
+                "All Time", "Daily (Today)", "Weekly", "Monthly", "Yearly"
         ));
-        filterCombo.getSelectionModel().selectFirst();
+filterCombo.getSelectionModel().selectFirst();
+
         filterCombo.setOnAction(e -> filterData());
 
         loadSalesData();
@@ -50,24 +54,34 @@ public class SalesController implements Initializable {
 
     private void loadSalesData() {
         masterList.clear();
-        File dir = new File(LOG_DIR);
 
-        if (dir.exists() && dir.isDirectory()) {
-            File[] files = dir.listFiles((d, name) -> name.startsWith("sales_") && name.endsWith(".csv"));
+        File dir = new File(AppConfig.SALES_LOG_DIR);
 
-            if (files != null) {
-                for (File file : files) {
-                    List<String> lines = FileUtil.readLines(file.getPath());
-                    for (String line : lines) {
-                        String[] parts = line.split(",");
-                        if (parts.length == 3) {
-                            try {
-                                String date = parts[0];
-                                String time = parts[1];
-                                double amount = Double.parseDouble(parts[2]);
-                                masterList.add(new SaleRecord(date, time, amount));
-                            } catch (NumberFormatException e) {
-                            }
+        if (!dir.exists() || !dir.isDirectory()) {
+            System.out.println("Sales directory not found at: " + dir.getAbsolutePath());
+            return;
+        }
+
+        File[] files = dir.listFiles((d, name) -> name.startsWith("sales_") && name.endsWith(".csv"));
+
+        if (files != null) {
+            for (File file : files) {
+                List<String> lines = FileUtil.readLines(file.getPath());
+                for (String line : lines) {
+                    if (line.trim().isEmpty()) continue;
+
+                    String[] parts = line.split(",");
+                    if (parts.length >= 3) {
+                        try {
+                            String date = parts[0].trim();
+                            String time = parts[1].trim();
+                            double amount = Double.parseDouble(parts[2].trim());
+
+                           String cashier = (parts.length >= 4) ? parts[3].trim() : "Unknown";
+
+                            masterList.add(new SaleRecord(date, time, amount, cashier));
+                        } catch (NumberFormatException e) {
+                            System.out.println("Skipping invalid record: " + line);
                         }
                     }
                 }
@@ -78,6 +92,8 @@ public class SalesController implements Initializable {
 
     private void filterData() {
         String selected = filterCombo.getValue();
+        if (selected == null) return;
+
         ObservableList<SaleRecord> filteredList = FXCollections.observableArrayList();
         double grandTotal = 0;
 
@@ -90,28 +106,29 @@ public class SalesController implements Initializable {
             try {
                 LocalDate recordDate = LocalDate.parse(record.getDate(), formatter);
 
-                if (selected.startsWith("All")) include = true;
-                else if (selected.startsWith("Daily")) {
+                if (selected.startsWith("All")) {
+                    include = true;
+                } else if (selected.startsWith("Daily")) {
                     if (recordDate.isEqual(today)) include = true;
-                }
-                else if (selected.startsWith("Weekly")) {
+                } else if (selected.startsWith("Weekly")) {
                     int currentWeek = today.get(weekFields.weekOfWeekBasedYear());
                     int recordWeek = recordDate.get(weekFields.weekOfWeekBasedYear());
                     if (recordDate.getYear() == today.getYear() && currentWeek == recordWeek) include = true;
-                }
-                else if (selected.startsWith("Monthly")) {
+                } else if (selected.startsWith("Monthly")) {
                     if (recordDate.getYear() == today.getYear() && recordDate.getMonth() == today.getMonth()) include = true;
-                }
-                else if (selected.startsWith("Yearly")) {
+                } else if (selected.startsWith("Yearly")) {
                     if (recordDate.getYear() == today.getYear()) include = true;
                 }
-            } catch (Exception e) { }
+            } catch (Exception e) {
+                System.out.println("Date parsing error for: " + record.getDate());
+            }
 
             if (include) {
                 filteredList.add(record);
                 grandTotal += record.getAmount();
             }
         }
+
         salesTable.setItems(filteredList);
         totalSalesLabel.setText("Total Revenue: P " + String.format("%.2f", grandTotal));
     }

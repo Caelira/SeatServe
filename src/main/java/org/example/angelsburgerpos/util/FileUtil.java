@@ -40,4 +40,20 @@ public class FileUtil {
         }
         return lines;
     }
+
+    public static void createDirectory(String dirPath) {
+        File dir = new File(dirPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+    }
+
+    public static void appendLine(String filePath, String line) {
+        try (FileWriter fw = new FileWriter(filePath, true);
+             PrintWriter pw = new PrintWriter(fw)) {
+            pw.println(line);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

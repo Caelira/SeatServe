@@ -1,17 +1,17 @@
-I01,Burger Bun,5,pcs
-I02,Footlong Bun,1000,pcs
-I03,Beef Patty,1000,pcs
-I04,Hotdog,1000,pcs
-I05,Hungarian Sausage,1000,pcs
-I06,Footlong Hotdog,1000,pcs
-I07,Ham Slice,1000,pcs
-I08,Bacon Slice,1000,pcs
-I09,Egg,1000,pcs
-I10,Cheese Slice,1000,pcs
-I11,Cucumber Slice,1000,pcs
-I12,Coleslaw Mix,1000,portions
-I13,Mayo Sachet,1000,pcs
-I14,Ketchup Sachet,1000,pcs
-I15,Hot Sauce Sachet,1000,pcs
-I16,Plastic Cup (Small),1000,pcs
-I17,Plastic Bottle (Empty),1000,pcs
+I01,Burger Bun,50,pcs,true
+I02,Footlong Bun,1000,pcs,true
+I03,Beef Patty,996,pcs,true
+I04,Hotdog,1000,pcs,true
+I05,Hungarian Sausage,1000,pcs,true
+I06,Footlong Hotdog,999,pcs,true
+I07,Ham Slice,1000,pcs,true
+I08,Bacon Slice,1000,pcs,true
+I09,Egg,1000,pcs,true
+I10,Cheese Slice,999,pcs,false
+I11,Cucumber Slice,1000,pcs,false
+I12,Coleslaw Mix,1000,portions,false
+I13,Mayo Sachet,996,pcs,false
+I14,Ketchup Sachet,995,pcs,false
+I15,Hot Sauce Sachet,1000,pcs,false
+I16,Plastic Cup (Small),1000,pcs,true
+I17,Plastic Bottle (Empty),1000,pcs,true

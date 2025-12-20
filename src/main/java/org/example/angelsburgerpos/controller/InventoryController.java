@@ -49,6 +49,7 @@ public class InventoryController implements Initializable {
             addIngBtn.setDisable(true);
             deleteBtn.setDisable(true);
             reduceBtn.setDisable(true);
+
         }
     }
 
@@ -104,9 +105,8 @@ public class InventoryController implements Initializable {
                 return;
             }
             selected.setStock(selected.getStock() + (qty * multiplier));
-            InventoryManager.reduceStock(new ArrayList<>());
+            InventoryManager.addIngredient(selected);
             restockInput.clear();
-            inventoryTable.refresh();
         } catch (NumberFormatException e) {
             showAlert("Error", "Invalid Number");
         }
@@ -133,12 +133,19 @@ public class InventoryController implements Initializable {
         TextField stockField = new TextField();
         stockField.setPromptText("Stock");
 
+        CheckBox criticalBox = new CheckBox("Critical Ingredient?");
+        criticalBox.setSelected(true); // Default to Critical (safer)
+        Tooltip tip = new Tooltip("Uncheck if this is an optional ingredient (e.g. sauce)");
+        criticalBox.setTooltip(tip);
+
         grid.add(new Label("Name:"), 0, 0);
         grid.add(nameField, 1, 0);
         grid.add(new Label("Unit:"), 0, 1);
         grid.add(unitField, 1, 1);
         grid.add(new Label("Stock:"), 0, 2);
         grid.add(stockField, 1, 2);
+        grid.add(criticalBox, 1, 3); // Add to layout
+
         dialog.getDialogPane().setContent(grid);
 
         dialog.setResultConverter(dialogButton -> {
@@ -148,7 +155,9 @@ public class InventoryController implements Initializable {
                     String unit = unitField.getText();
                     int stock = Integer.parseInt(stockField.getText());
                     String id = (name.length() > 3 ? name.substring(0, 3) : name).toUpperCase();
-                    return new Ingredient(id, name, stock, unit);
+                    boolean isCritical = criticalBox.isSelected();
+
+                     return new Ingredient(id, name, stock, unit, isCritical);
                 } catch (Exception e) {
                     return null;
                 }

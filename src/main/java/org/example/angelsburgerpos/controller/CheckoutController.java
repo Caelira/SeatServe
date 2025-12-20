@@ -3,6 +3,7 @@ package org.example.angelsburgerpos.controller;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable; // Import this!
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -14,8 +15,9 @@ import org.example.angelsburgerpos.model.Receipt;
 import org.example.angelsburgerpos.service.TransactionService;
 
 import java.io.IOException;
-
-public class CheckoutController {
+import java.net.URL;
+import java.util.ResourceBundle;
+public class CheckoutController implements Initializable {
 
     @FXML private Label totalLabel;
     @FXML private TextField cashInput;
@@ -24,10 +26,43 @@ public class CheckoutController {
     private double totalAmount;
     private ObservableList<CartItem> cartItems;
     private Runnable onComplete;
+    private String cashierName;
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        cashInput.textProperty().addListener((observable, oldValue, newValue) -> {
+            calculateChange(newValue);
+        });
+    }
 
-    public void setOrderData(double total, ObservableList<CartItem> items, Runnable onComplete) {
+    // calculate and update label
+    private void calculateChange(String cashText) {
+        try {
+            if (cashText.isEmpty()) {
+                changeLabel.setText("Change: P 0.00");
+                changeLabel.setStyle("-fx-text-fill: black;");
+                return;
+            }
+
+            double cash = Double.parseDouble(cashText);
+            double change = cash - totalAmount;
+
+            if (change < 0) {
+                changeLabel.setText("Not enough cash");
+                changeLabel.setStyle("-fx-text-fill: red;");
+            } else {
+                changeLabel.setText("Change: P " + String.format("%.2f", change));
+                changeLabel.setStyle("-fx-text-fill: #2e7d32;");
+            }
+
+        } catch (NumberFormatException e) {
+            changeLabel.setText("Invalid Amount");
+        }
+    }
+
+    public void setOrderData(double total, ObservableList<CartItem> items, String cashierName, Runnable onComplete) {
         this.totalAmount = total;
         this.cartItems = items;
+        this.cashierName = cashierName;
         this.onComplete = onComplete;
         totalLabel.setText("P " + String.format("%.2f", total));
     }
@@ -42,7 +77,7 @@ public class CheckoutController {
                 return;
             }
 
-            Receipt receipt = TransactionService.processTransaction(cartItems, totalAmount, cash);
+            Receipt receipt = TransactionService.processTransaction(cartItems, totalAmount, cash, cashierName);
 
             openReceiptWindow(receipt.getContent());
             closeWindow();

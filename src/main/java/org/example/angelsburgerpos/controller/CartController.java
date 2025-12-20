@@ -11,6 +11,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.angelsburgerpos.model.CartItem;
+import org.example.angelsburgerpos.model.User;
 
 import java.io.IOException;
 
@@ -29,11 +30,14 @@ public class CartController {
         colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
         cartTable.setItems(cartList);
     }
+    private User currentUser;
 
+    public void setUser(User user) {
+        this.currentUser = user;
+    }
     @FXML
     private void onPayClicked() {
         ObservableList<CartItem> items = cartTable.getItems();
-
         if (items.isEmpty()) return;
 
         try {
@@ -47,7 +51,10 @@ public class CartController {
                 total += item.getTotal();
             }
 
-            controller.setOrderData(total, items, () -> {
+            // PASS USER NAME TO CHECKOUT
+            String cashierName = (currentUser != null) ? currentUser.getFullname() : "Unknown";
+
+            controller.setOrderData(total, items, cashierName, () -> {
                 items.clear();
                 closeWindow();
             });
