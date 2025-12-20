@@ -7,10 +7,13 @@ import javafx.application.Platform;
 import java.io.*;
 import java.util.*;
 
+//the brain of stock system
 public class InventoryManager {
 
     private static Map<String, Ingredient> ingredientMap = new HashMap<>();
     private static Map<String, Map<String, Integer>> recipeMap = new HashMap<>();
+
+    // Updates the ui whenever there is a change in stock
     private static Runnable refreshListener;
 
     public static void initialize() {
@@ -18,10 +21,12 @@ public class InventoryManager {
         loadRecipes();
     }
 
+    // refresh the table when stock changes
     public static void setRefreshListener(Runnable listener) {
         refreshListener = listener;
     }
 
+    // Loads raw ingredient data
     private static void loadIngredients() {
         List<String> lines = FileUtil.readLines(AppConfig.INGREDIENTS_FILE);
         ingredientMap.clear();
@@ -36,6 +41,7 @@ public class InventoryManager {
         }
     }
 
+    // Loads recipe data ; what ingredient creates wwwhat product
     private static void loadRecipes() {
         List<String> lines = FileUtil.readResource(AppConfig.RECIPES_RESOURCE);
         for (String line : lines) {
@@ -52,9 +58,9 @@ public class InventoryManager {
         }
     }
 
+    // Used by KioskServer to check availability
     public static boolean canMakeProduct(String productId, int quantity) {
         if (ingredientMap.isEmpty()) initialize();
-
         if (!recipeMap.containsKey(productId)) return true;
 
         Map<String, Integer> requiredIngredients = recipeMap.get(productId);
@@ -66,6 +72,7 @@ public class InventoryManager {
 
             if (ingredientMap.containsKey(ingId)) {
                 Ingredient ing = ingredientMap.get(ingId);
+                // Only stop sale if a CRITICAL ingredient is missing (e.g. Bun)
                 if (ing.isCritical() && ing.getStock() < totalRequired) {
                     return false;
                 }
@@ -76,22 +83,22 @@ public class InventoryManager {
         return true;
     }
 
+    // calculates how many products you can make
     public static int calculateMaxStock(String productId, List<CartItem> currentCart) {
         if (ingredientMap.isEmpty()) initialize();
         if (!recipeMap.containsKey(productId)) return 100;
 
+        // copy current stock
         Map<String, Integer> tempStock = new HashMap<>();
         for (Ingredient ing : ingredientMap.values()) {
             tempStock.put(ing.getId(), ing.getStock());
         }
-
         for (CartItem item : currentCart) {
             if (recipeMap.containsKey(item.getProduct().getId())) {
                 Map<String, Integer> ingredientsNeeded = recipeMap.get(item.getProduct().getId());
                 for (Map.Entry<String, Integer> entry : ingredientsNeeded.entrySet()) {
                     String ingId = entry.getKey();
                     int qtyPerUnit = entry.getValue();
-
                     if (item.getRemovedIngredients() != null && item.getRemovedIngredients().contains(ingId)) {
                         continue;
                     }
@@ -103,6 +110,7 @@ public class InventoryManager {
             }
         }
 
+        // 3. Calculate Max Possible for Target Product based on remaining tempStock
         Map<String, Integer> neededForTarget = recipeMap.get(productId);
         int maxPossible = Integer.MAX_VALUE;
 
@@ -113,6 +121,7 @@ public class InventoryManager {
             if (ingredientMap.containsKey(ingId)) {
                 Ingredient ing = ingredientMap.get(ingId);
 
+                // Only limit max stock based on Critical items
                 if (ing.isCritical()) {
                     int available = tempStock.getOrDefault(ingId, 0);
                     if (available < 0) available = 0;
@@ -129,6 +138,7 @@ public class InventoryManager {
         return maxPossible;
     }
 
+    // Called after payment: Permanently removes items from database
     public static void reduceStock(List<CartItem> soldItems) {
         if (ingredientMap.isEmpty()) initialize();
 
@@ -144,6 +154,7 @@ public class InventoryManager {
                     int totalDeduction = qtyPerUnit * qtySold;
 
                     if (ingredientMap.containsKey(ingId)) {
+                        // Skip if user said "No [Ingredient]"
                         if (item.getRemovedIngredients() != null && item.getRemovedIngredients().contains(ingId)) {
                             continue;
                         }
@@ -159,6 +170,7 @@ public class InventoryManager {
         notifyRefresh();
     }
 
+    // Saves current state to ingredients.txt
     private static void saveInventory() {
         try (PrintWriter writer = new PrintWriter(new File(AppConfig.INGREDIENTS_FILE))) {
             List<Ingredient> list = new ArrayList<>(ingredientMap.values());
@@ -172,10 +184,12 @@ public class InventoryManager {
         }
     }
 
+    // Triggers UI update
     private static void notifyRefresh() {
         if (refreshListener != null) Platform.runLater(refreshListener);
     }
 
+    // Getters for UI
     public static List<Ingredient> getAllIngredients() {
         if (ingredientMap.isEmpty()) initialize();
         List<Ingredient> list = new ArrayList<>(ingredientMap.values());
@@ -197,28 +211,23 @@ public class InventoryManager {
         notifyRefresh();
     }
 
-
+    // Archives an ingredient (Soft Delete)
     public static void archiveIngredient(String id, String reason) {
         if (ingredientMap.containsKey(id)) {
             Ingredient ing = ingredientMap.get(id);
-
-            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            String logEntry = String.format("%s,INGREDIENT,%s,%s,%d,%s,%s",
-                    timestamp, ing.getId(), ing.getName(), ing.getStock(), ing.getUnit(), reason);
-            FileUtil.appendLine(AppConfig.ARCHIVES_FILE, logEntry);
+            logArchive(ing, reason);
             ingredientMap.remove(id);
             saveInventory();
             notifyRefresh();
         }
     }
 
+    // Writes to archives.txt
     private static void logArchive(Ingredient ing, String reason) {
         try (FileWriter fw = new FileWriter(AppConfig.ARCHIVES_FILE, true);
              PrintWriter pw = new PrintWriter(fw)) {
             String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             pw.printf("%s,%s,%s,%d,%s,%s%n", timestamp, ing.getId(), ing.getName(), ing.getStock(), ing.getUnit(), reason);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 }

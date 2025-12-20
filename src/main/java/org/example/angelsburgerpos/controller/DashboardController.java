@@ -40,26 +40,46 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
-    @FXML private StackPane mainContentArea;
-    @FXML private AnchorPane menuSection;
-    @FXML private Label nameLabel;
-    @FXML private Label dateLabel;
-    @FXML private ImageView logo;
-    @FXML private Label roleLabel;
-    @FXML private Button menuButton;
-    @FXML private Button mobileOrdersButton;
-    @FXML private Button employeesButton;
-    @FXML private Button logoutButton;
-    @FXML private Label totalLabel;
-    @FXML private Button viewCartButton;
-    @FXML private Button warningButtonForAdmin;
-    @FXML private TableView<Product> menuTable;
-    @FXML private TableColumn<Product, String> colName;
-    @FXML private TableColumn<Product, String> colCategory;
-    @FXML private TableColumn<Product, Double> colPrice;
-    @FXML private TableColumn<Product, Integer> colStock;
-    @FXML private TableColumn<Product, Void> colAction;
-    @FXML private Button warningButton;
+    @FXML
+    private StackPane mainContentArea;
+    @FXML
+    private AnchorPane menuSection;
+    @FXML
+    private Label nameLabel;
+    @FXML
+    private Label dateLabel;
+    @FXML
+    private ImageView logo;
+    @FXML
+    private Label roleLabel;
+    @FXML
+    private Button menuButton;
+    @FXML
+    private Button mobileOrdersButton;
+    @FXML
+    private Button employeesButton;
+    @FXML
+    private Button logoutButton;
+    @FXML
+    private Label totalLabel;
+    @FXML
+    private Button viewCartButton;
+    @FXML
+    private Button warningButtonForAdmin;
+    @FXML
+    private TableView<Product> menuTable;
+    @FXML
+    private TableColumn<Product, String> colName;
+    @FXML
+    private TableColumn<Product, String> colCategory;
+    @FXML
+    private TableColumn<Product, Double> colPrice;
+    @FXML
+    private TableColumn<Product, Integer> colStock;
+    @FXML
+    private TableColumn<Product, Void> colAction;
+    @FXML
+    private Button warningButton;
     @FXML
     private Button archiveButton;
     private KioskServer kioskServer;
@@ -153,13 +173,28 @@ public class DashboardController implements Initializable {
         menuTable.refresh();
     }
 
-    @FXML private void filterBurgers() { loadProducts("Burger"); }
-    @FXML private void filterSandwiches() { loadProducts("Sandwich"); }
-    @FXML private void filterDrinks() { loadProducts("Drink"); }
-    @FXML private void filterAll() { loadProducts("ALL"); }
+    @FXML
+    private void filterBurgers() {
+        loadProducts("Burger");
+    }
+
+    @FXML
+    private void filterSandwiches() {
+        loadProducts("Sandwich");
+    }
+
+    @FXML
+    private void filterDrinks() {
+        loadProducts("Drink");
+    }
+
+    @FXML
+    private void filterAll() {
+        loadProducts("ALL");
+    }
 
     private void addToCart(Product product) {
-         int remainingStock = org.example.angelsburgerpos.util.InventoryManager.calculateMaxStock(
+        int remainingStock = org.example.angelsburgerpos.util.InventoryManager.calculateMaxStock(
                 product.getId(),
                 new ArrayList<>(cartList)
         );
@@ -218,7 +253,8 @@ public class DashboardController implements Initializable {
         viewCartButton.setText("VIEW CART (" + count + ")");
     }
 
-    @FXML private void menuButtonClicked() {
+    @FXML
+    private void menuButtonClicked() {
         mainContentArea.getChildren().clear();
         if (menuSection != null) {
             mainContentArea.getChildren().add(menuSection);
@@ -226,10 +262,25 @@ public class DashboardController implements Initializable {
         }
     }
 
-    @FXML private void inventoryClicked() { loadView("/org/example/angelsburgerpos/inventory-view.fxml"); }
-    @FXML private void reportsClicked() { loadView("/org/example/angelsburgerpos/sales-view.fxml"); }
-    @FXML private void employeesClicked() { loadView("/org/example/angelsburgerpos/employees-view.fxml"); }
-    @FXML private void viewMobileOrdersClicked() { loadView("/org/example/angelsburgerpos/mobile-orders-view.fxml"); }
+    @FXML
+    private void inventoryClicked() {
+        loadView("/org/example/angelsburgerpos/inventory-view.fxml");
+    }
+
+    @FXML
+    private void reportsClicked() {
+        loadView("/org/example/angelsburgerpos/sales-view.fxml");
+    }
+
+    @FXML
+    private void employeesClicked() {
+        loadView("/org/example/angelsburgerpos/employees-view.fxml");
+    }
+
+    @FXML
+    private void viewMobileOrdersClicked() {
+        loadView("/org/example/angelsburgerpos/mobile-orders-view.fxml");
+    }
 
     private void loadView(String fxmlPath) {
         try {
@@ -262,7 +313,9 @@ public class DashboardController implements Initializable {
         }
     }
 
-    public List<MobileOrder> getPendingOrders() { return pendingOrders; }
+    public List<MobileOrder> getPendingOrders() {
+        return pendingOrders;
+    }
 
     public void addPendingOrder(MobileOrder order) {
         pendingOrders.add(order);
@@ -317,14 +370,16 @@ public class DashboardController implements Initializable {
         if (user.getRole().equalsIgnoreCase("Cashier/cook")) {
             employeesButton.setVisible(false);
             archiveButton.setVisible(false);
-        } else if(user.getRole().equalsIgnoreCase("admin")){
+        } else if (user.getRole().equalsIgnoreCase("admin")) {
             mobileOrdersButton.setVisible(false);
             menuButton.setVisible(false);
         }
         checkLowStock();
     }
 
-    public void showSalesSection() { reportsClicked(); }
+    public void showSalesSection() {
+        reportsClicked();
+    }
 
     private void setLogo(User user) {
         try {
@@ -356,12 +411,15 @@ public class DashboardController implements Initializable {
                 break;
             }
         }
+
+        boolean isAdmin = (user != null && user.getRole().equalsIgnoreCase("admin"));
+
         if (warningButton != null) {
-            warningButton.setVisible(hasLowStock);
-            warningButton.setManaged(hasLowStock);
+            boolean showGeneric = hasLowStock && !isAdmin;
+            warningButton.setVisible(showGeneric);
+            warningButton.setManaged(showGeneric);
         }
         if (warningButtonForAdmin != null) {
-            boolean isAdmin = (user != null && user.getRole().equalsIgnoreCase("admin"));
             boolean showForAdmin = hasLowStock && isAdmin;
             warningButtonForAdmin.setVisible(showForAdmin);
             warningButtonForAdmin.setManaged(showForAdmin);
@@ -383,7 +441,9 @@ public class DashboardController implements Initializable {
         }
     }
 
-    public User getUser() { return user; }
+    public User getUser() {
+        return user;
+    }
 
     @FXML
     private void viewCartClicked() {
@@ -416,7 +476,7 @@ public class DashboardController implements Initializable {
 
             controller.setData(product, (customItem) -> {
                 cartList.add(customItem);
-                });
+            });
 
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -427,6 +487,7 @@ public class DashboardController implements Initializable {
             e.printStackTrace();
         }
     }
+
     @FXML
     private void archivesClicked() {
         loadView("/org/example/angelsburgerpos/archives-view.fxml");

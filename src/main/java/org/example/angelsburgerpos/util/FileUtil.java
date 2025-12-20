@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+//handles file io
 public class FileUtil {
 
+    // reads a file, returns a string
     public static List<String> readLines(String filePath) {
         List<String> lines = new ArrayList<>();
         File file = new File(filePath);
@@ -25,6 +27,7 @@ public class FileUtil {
         return lines;
     }
 
+    // Reads a file from the resource folder. (inside project)_
     public static List<String> readResource(String resourcePath) {
         List<String> lines = new ArrayList<>();
         InputStream is = FileUtil.class.getResourceAsStream(resourcePath);
@@ -41,6 +44,7 @@ public class FileUtil {
         return lines;
     }
 
+    // creates the directory if missing
     public static void createDirectory(String dirPath) {
         File dir = new File(dirPath);
         if (!dir.exists()) {
@@ -48,6 +52,7 @@ public class FileUtil {
         }
     }
 
+    // appends a line
     public static void appendLine(String filePath, String line) {
         try (FileWriter fw = new FileWriter(filePath, true);
              PrintWriter pw = new PrintWriter(fw)) {

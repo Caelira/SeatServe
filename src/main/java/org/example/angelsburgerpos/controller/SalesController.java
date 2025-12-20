@@ -52,13 +52,13 @@ filterCombo.getSelectionModel().selectFirst();
         loadSalesData();
     }
 
+    //reads the files
     private void loadSalesData() {
         masterList.clear();
 
         File dir = new File(AppConfig.SALES_LOG_DIR);
 
         if (!dir.exists() || !dir.isDirectory()) {
-            System.out.println("Sales directory not found at: " + dir.getAbsolutePath());
             return;
         }
 

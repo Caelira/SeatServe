@@ -35,6 +35,7 @@ public class KioskServer {
     }
 
     public void startServer() {
+        //starts at port 5050
         app = Javalin.create(config -> {
             config.staticFiles.add("webapp", Location.CLASSPATH);
         }).start(5050);

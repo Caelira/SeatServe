@@ -1,6 +1,6 @@
-I01,Burger Bun,33,pcs,true
+I01,Burger Bun,5,pcs,true
 I02,Footlong Bun,1000,pcs,true
-I03,Beef Patty,982,pcs,true
+I03,Beef Patty,978,pcs,true
 I04,Hotdog,1000,pcs,true
 I05,Hungarian Sausage,1000,pcs,true
 I06,Footlong Hotdog,999,pcs,true
@@ -10,8 +10,8 @@ I09,Egg,1000,pcs,true
 I10,Cheese Slice,994,pcs,false
 I11,Cucumber Slice,1000,pcs,false
 I12,Coleslaw Mix,1000,portions,false
-I13,Mayo Sachet,979,pcs,false
-I14,Ketchup Sachet,981,pcs,false
+I13,Mayo Sachet,975,pcs,false
+I14,Ketchup Sachet,977,pcs,false
 I15,Hot Sauce Sachet,1000,pcs,false
 I16,Plastic Cup (Small),1000,pcs,true
 I17,Plastic Bottle (Empty),1000,pcs,true

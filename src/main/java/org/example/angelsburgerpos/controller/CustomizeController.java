@@ -38,7 +38,7 @@ public class CustomizeController {
             String ingName = InventoryManager.getIngredientName(ingId);
 
             CheckBox cb = new CheckBox(ingName);
-            cb.setSelected(true); // Default is "Included"
+            cb.setSelected(true);
             cb.setUserData(ingId);
 
             cb.selectedProperty().addListener((obs, oldVal, newVal) -> {
