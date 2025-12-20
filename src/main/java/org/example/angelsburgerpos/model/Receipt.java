@@ -1,5 +1,8 @@
 package org.example.angelsburgerpos.model;
 
+import org.example.angelsburgerpos.util.AppConfig; // Import AppConfig
+
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -71,7 +74,12 @@ public class Receipt {
     }
 
     public void saveToFile() {
-        String filename = "receipt_" + System.currentTimeMillis() + ".txt";
+        File dir = new File(AppConfig.RECEIPTS_DIR);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        String filename = AppConfig.RECEIPTS_DIR + "receipt_" + System.currentTimeMillis() + ".txt";
+
         try (FileWriter writer = new FileWriter(filename)) {
             writer.write(content);
         } catch (IOException e) {
