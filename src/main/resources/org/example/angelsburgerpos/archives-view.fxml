@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="600.0" prefWidth="800.0" spacing="15.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.angelsburgerpos.controller.ArchivesController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+        <Label text="ARCHIVES LOG">
+            <font>
+                <Font name="System Bold" size="24.0" />
+            </font>
+        </Label>
+        <Label text="History of deleted ingredients and removed users." textFill="#666666" />
+
+        <TableView fx:id="archivesTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colDate" prefWidth="140.0" text="Date Removed" />
+                <TableColumn fx:id="colType" prefWidth="100.0" text="Type" />
+                <TableColumn fx:id="colId" prefWidth="100.0" text="ID / User" />
+                <TableColumn fx:id="colName" prefWidth="150.0" text="Name" />
+                <TableColumn fx:id="colDetails" prefWidth="100.0" text="Details" />
+                <TableColumn fx:id="colReason" prefWidth="200.0" text="Reason" />
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
+        </TableView>
+    </children>
+</VBox>

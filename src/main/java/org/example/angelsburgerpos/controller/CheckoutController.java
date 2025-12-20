@@ -34,7 +34,6 @@ public class CheckoutController implements Initializable {
         });
     }
 
-    // calculate and update label
     private void calculateChange(String cashText) {
         try {
             if (cashText.isEmpty()) {

@@ -39,7 +39,7 @@ public class MobileOrdersController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-       }
+    }
 
     public void setOrderList(ObservableList<MobileOrder> orderList) {
         this.orderList = orderList;
@@ -61,7 +61,7 @@ public class MobileOrdersController implements Initializable {
 
             if (orderList != null) {
                 for (MobileOrder order : orderList) {
-                    if ("PREPARING".equals(order.getStatus()) || "READY".equals(order.getStatus())) {
+                    if ("PREPARING".equals(order.getStatus())) {
                         try {
                             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/angelsburgerpos/order-card-view.fxml"));
                             Parent cardNode = loader.load();
@@ -87,9 +87,7 @@ public class MobileOrdersController implements Initializable {
         if (orderList != null) {
             for (MobileOrder order : orderList) {
                 if (order.getOrderId().equals(code) && "PENDING_PAYMENT".equals(order.getStatus())) {
-
                     openPaymentWindow(order);
-
                     codeField.clear();
                     return;
                 }
@@ -150,7 +148,7 @@ public class MobileOrdersController implements Initializable {
         delay.setOnFinished(event -> {
             if (orderList != null) {
                 orderList.remove(order);
-                System.out.println("Order #" + order.getOrderId() + " auto-deleted.");
+                System.out.println("Order #" + order.getOrderId() + " fully removed from memory.");
             }
         });
         delay.play();

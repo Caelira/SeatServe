@@ -27,12 +27,8 @@
         <h2>Your Order</h2>
         <div style="font-size: 24px;">🛒</div>
     </div>
-
-    <div id="cartItemsList">
-    </div>
-
+    <div id="cartItemsList"></div>
     <div class="cart-total">Total: P <span id="cartTotalDisplay">0.00</span></div>
-
     <button class="confirm-btn" onclick="submitOrder()">CONFIRM ORDER</button>
     <button class="back-btn" onclick="backToMenu()">ADD MORE ITEMS</button>
 </div>
@@ -66,13 +62,12 @@
     let orderId = localStorage.getItem('angels_order_id');
     let alarmInterval = null;
     let allProductsData = [];
-
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+    const FALLBACK_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+
     window.onload = function() {
-        if (orderId) {
-            checkStatusOnce(orderId);
-        }
+        if (orderId) checkStatusOnce(orderId);
     };
 
     function unlockAudio() {
@@ -109,13 +104,7 @@
     function filterMenu(category, clickedBtn) {
         document.querySelectorAll('.filter-chip').forEach(btn => btn.classList.remove('chip-active'));
         clickedBtn.classList.add('chip-active');
-
-        let filteredList;
-        if (category === 'All') {
-            filteredList = allProductsData;
-        } else {
-            filteredList = allProductsData.filter(p => p.category === category);
-        }
+        let filteredList = (category === 'All') ? allProductsData : allProductsData.filter(p => p.category === category);
         renderList(filteredList);
     }
 
@@ -132,10 +121,18 @@
             const btnColor = p.available ? '#d32f2f' : '#9e9e9e';
             const opacity = p.available ? '1' : '0.6';
 
+            let imageName = p.image || "";
+            imageName = imageName.trim();
+
+            let imagePath = imageName ? `/images/${encodeURIComponent(imageName)}` : FALLBACK_IMAGE;
+
             list.innerHTML += `
                     <div class="card" style="opacity: ${opacity};">
-                        <div class="info">
-                            <h3>${p.name}</h3><div class="price">P ${p.price}</div>
+                         <img src="${imagePath}"
+                              alt="${p.name}"
+                              class="product-img"
+                              onerror="this.onerror=null; this.src='${FALLBACK_IMAGE}';"> <div class="info">
+                            <h3>${p.name}</h3><div class="price">P ${p.price.toFixed(2)}</div>
                         </div>
                         <button class="add-btn"
                                 onclick="addToCart('${p.id}')"
@@ -146,7 +143,6 @@
                     </div>`;
         });
     }
-
 
     function addToCart(id) {
         cart.push({ productId: id, quantity: 1 });
@@ -159,28 +155,20 @@
 
     function showCart() {
         if (cart.length === 0) return alert("Your cart is empty!");
-
         const list = document.getElementById('cartItemsList');
         list.innerHTML = '';
         let total = 0;
-
         cart.forEach((item, index) => {
             const product = allProductsData.find(p => p.id === item.productId);
-
             if (product) {
                 total += product.price;
                 list.innerHTML += `
                         <div class="cart-item">
-                            <div>
-                                <b>${product.name}</b><br>
-                                <span class="price">P ${product.price}</span>
-                            </div>
+                            <div><b>${product.name}</b><br><span class="price">P ${product.price}</span></div>
                             <button class="remove-btn" onclick="removeFromCart(${index})">X</button>
-                        </div>
-                    `;
+                        </div>`;
             }
         });
-
         document.getElementById('cartTotalDisplay').innerText = total.toFixed(2);
         showView('cartView');
     }
@@ -188,24 +176,14 @@
     function removeFromCart(index) {
         cart.splice(index, 1);
         updateCartCount();
-
-        if (cart.length === 0) {
-            backToMenu();
-        } else {
-            showCart();
-        }
+        if (cart.length === 0) backToMenu(); else showCart();
     }
 
-    function backToMenu() {
-        showView('menuView');
-    }
-
+    function backToMenu() { showView('menuView'); }
 
     function submitOrder() {
         if(cart.length === 0) return alert("Empty Cart!");
-
         unlockAudio();
-
         fetch('/api/order', { method: 'POST', body: JSON.stringify(cart) })
             .then(r => r.json())
             .then(id => {
@@ -213,63 +191,30 @@
                 localStorage.setItem('angels_order_id', id);
                 document.getElementById('orderCode').innerText = id;
                 showView('paymentView');
-
                 cart = [];
                 updateCartCount();
-
                 startPolling();
             });
     }
 
     function checkStatusOnce(id) {
-        fetch(`/api/order/${id}/status`)
-            .then(r => r.text())
-            .then(status => {
-                document.getElementById('orderCode').innerText = id;
-                if (status === 'PENDING_PAYMENT') {
-                    showView('paymentView');
-                    startPolling();
-                } else if (status === 'PREPARING') {
-                    showView('preparingView');
-                    startPolling();
-                } else if (status === 'READY') {
-                    triggerAlarm();
-                } else {
-                    localStorage.removeItem('angels_order_id');
-                    orderId = null;
-                    showView('menuView');
-                }
-            })
-            .catch(() => {});
+        fetch(`/api/order/${id}/status`).then(r => r.text()).then(status => {
+            document.getElementById('orderCode').innerText = id;
+            if (status === 'PENDING_PAYMENT') { showView('paymentView'); startPolling(); }
+            else if (status === 'PREPARING') { showView('preparingView'); startPolling(); }
+            else if (status === 'READY') { triggerAlarm(); }
+            else { localStorage.removeItem('angels_order_id'); orderId = null; showView('menuView'); }
+        }).catch(() => {});
     }
 
     function startPolling() {
         const poll = setInterval(() => {
-            if (!orderId) {
-                clearInterval(poll);
-                return;
-            }
-
+            if (!orderId) { clearInterval(poll); return; }
             fetch(`/api/order/${orderId}/status`).then(r => r.text()).then(status => {
-                if (status === 'PREPARING') {
-                    showView('preparingView');
-                }
-                else if (status === 'READY') {
-                    clearInterval(poll);
-                    triggerAlarm();
-                }
-                else if (status === 'COMPLETED' || status === 'NOT_FOUND') {
-                    clearInterval(poll);
-                    localStorage.removeItem('angels_order_id');
-                    location.reload();
-                }
-            }).catch(err => {
-                if(err.message.includes("404")) {
-                    clearInterval(poll);
-                    localStorage.removeItem('angels_order_id');
-                    location.reload();
-                }
-            });
+                if (status === 'PREPARING') showView('preparingView');
+                else if (status === 'READY') { clearInterval(poll); triggerAlarm(); }
+                else if (status === 'COMPLETED' || status === 'NOT_FOUND') { clearInterval(poll); localStorage.removeItem('angels_order_id'); location.reload(); }
+            }).catch(err => { if(err.message.includes("404")) { clearInterval(poll); localStorage.removeItem('angels_order_id'); location.reload(); }});
         }, 2000);
     }
 
@@ -282,32 +227,18 @@
         alarmInterval = setInterval(playBeep, 800);
     }
 
-    function stopAlarm() {
-        clearInterval(alarmInterval);
-        if (navigator.vibrate) navigator.vibrate(0);
-        localStorage.removeItem('angels_order_id');
-        location.reload();
-    }
-    function finishOrder() {
-        localStorage.removeItem('angels_order_id');
-        location.reload();
-    }
     function silenceAlarm() {
         if (alarmInterval) clearInterval(alarmInterval);
         if (navigator.vibrate) navigator.vibrate(0);
-
         document.getElementById('alarmScreen').classList.add('silenced');
-
         document.querySelector('.alarm-msg').innerText = "Show this to Cashier:";
-
-
         const btn = document.getElementById('actionBtn');
         btn.innerText = "ORDER RECEIVED (EXIT)";
         btn.style.backgroundColor = "#ff9800";
         btn.style.color = "white";
-
-        btn.onclick = finishOrder;
+        btn.onclick = function() { localStorage.removeItem('angels_order_id'); location.reload(); };
     }
+
     function showView(viewId) {
         ['menuView', 'cartView', 'paymentView', 'preparingView', 'alarmView'].forEach(id => {
             const el = document.getElementById(id);

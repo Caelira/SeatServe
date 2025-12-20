@@ -65,18 +65,17 @@ public class InventoryController implements Initializable {
     public void setDeleteBtn() {
         Ingredient selected = inventoryTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showAlert("No Selection", "Please select an ingredient");
+            showAlert("No Selection", "Please select an ingredient to archive.");
             return;
         }
-
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Archive Ingredient");
         dialog.setHeaderText("Archiving: " + selected.getName());
-        dialog.setContentText("Reason for archive:");
+        dialog.setContentText("Please enter a reason/remark:");
 
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(reason -> {
-            if (reason.trim().isEmpty()) reason = "No Reason Given";
+            if (reason.trim().isEmpty()) reason = "No reason provided";
             InventoryManager.archiveIngredient(selected.getId(), reason);
             loadIngredients();
         });

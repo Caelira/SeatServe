@@ -12,6 +12,7 @@ import org.example.angelsburgerpos.model.Product;
 import org.example.angelsburgerpos.util.InventoryManager;
 import org.example.angelsburgerpos.util.OrderRequest;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,18 +41,33 @@ public class KioskServer {
 
         app.get("/api/menu", ctx -> {
             List<Product> allProducts = productService.getProducts();
-
             List<Map<String, Object>> menuResponse = new ArrayList<>();
+
+            System.out.println("--- CHECKING IMAGES ---");
 
             for (Product p : allProducts) {
                 boolean available = checkAvailability(p);
+
+                String imageName = "placeholder.png";
+                String fullPath = p.getImagePath();
+                if (fullPath != null && !fullPath.isEmpty()) {
+                    java.io.File f = new java.io.File(fullPath);
+                    imageName = f.getName();
+                }
+
+                 URL resourceUrl = getClass().getResource("/webapp/images/" + imageName);
+                if (resourceUrl == null) {
+                    System.out.println("⚠️ MISSING IMAGE: " + imageName + " (Product: " + p.getName() + ")");
+                    imageName = "placeholder.png";
+                }
 
                 menuResponse.add(Map.of(
                         "id", p.getId(),
                         "name", p.getName(),
                         "price", p.getPrice(),
                         "category", p.getCategory(),
-                        "available", available
+                        "available", available,
+                        "image", imageName
                 ));
             }
             String jsonResponse = gson.toJson(menuResponse);
@@ -61,29 +77,21 @@ public class KioskServer {
         app.post("/api/order", ctx -> {
             String body = ctx.body();
             try {
-                List<OrderRequest> items = gson.fromJson(body, new TypeToken<List<OrderRequest>>() {
-                }.getType());
-
+                List<OrderRequest> items = gson.fromJson(body, new TypeToken<List<OrderRequest>>() {}.getType());
                 String shortId = String.format("%03d", orderCounter++);
-
                 MobileOrder order = new MobileOrder("Customer #" + shortId, items);
                 order.setOrderId(shortId);
                 order.setStatus("PENDING_PAYMENT");
-
                 Platform.runLater(() -> dashboard.addPendingOrder(order));
-                String jsonResponse = gson.toJson(order.getOrderId());
-                ctx.status(201).result(jsonResponse).contentType("application/json");
-
+                ctx.status(201).result(gson.toJson(order.getOrderId())).contentType("application/json");
             } catch (JsonSyntaxException e) {
-                System.out.println("Error: " + e.getMessage());
-                ctx.status(400).result("Error processing order. Please try again.");
+                ctx.status(400).result("Error");
             }
         });
 
         app.get("/api/order/{id}/status", ctx -> {
             String id = ctx.pathParam("id");
             String status = "PENDING";
-
             if (dashboard.getPendingOrders() != null) {
                 for (MobileOrder o : dashboard.getPendingOrders()) {
                     if (o.getOrderId().equals(id)) {
@@ -97,8 +105,6 @@ public class KioskServer {
     }
 
     public void stop() {
-        if (app != null) {
-            app.stop();
-        }
+        if (app != null) app.stop();
     }
 }

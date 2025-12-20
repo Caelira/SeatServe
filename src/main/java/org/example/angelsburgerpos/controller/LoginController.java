@@ -62,6 +62,10 @@ public class LoginController {
             DashboardController dashboard = loader.getController();
             dashboard.setUserInfo(user);
 
+            if (user.getRole().equalsIgnoreCase("admin")) {
+                dashboard.showSalesSection();
+            }
+
             Stage stage = (Stage) usernameField.getScene().getWindow();
             stage.setTitle("Angels Burger POS - Dashboard");
             stage.setScene(new Scene(root));

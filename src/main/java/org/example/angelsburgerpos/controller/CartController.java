@@ -51,7 +51,6 @@ public class CartController {
                 total += item.getTotal();
             }
 
-            // PASS USER NAME TO CHECKOUT
             String cashierName = (currentUser != null) ? currentUser.getFullname() : "Unknown";
 
             controller.setOrderData(total, items, cashierName, () -> {

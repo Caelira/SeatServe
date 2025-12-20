@@ -66,15 +66,16 @@ public class InventoryManager {
 
             if (ingredientMap.containsKey(ingId)) {
                 Ingredient ing = ingredientMap.get(ingId);
-if (ing.isCritical() && ing.getStock() < totalRequired) {
+                if (ing.isCritical() && ing.getStock() < totalRequired) {
                     return false;
                 }
             } else {
-                return false; // Ingredient missing from DB
+                return false;
             }
         }
         return true;
     }
+
     public static int calculateMaxStock(String productId, List<CartItem> currentCart) {
         if (ingredientMap.isEmpty()) initialize();
         if (!recipeMap.containsKey(productId)) return 100;
@@ -196,10 +197,15 @@ if (ing.isCritical() && ing.getStock() < totalRequired) {
         notifyRefresh();
     }
 
+
     public static void archiveIngredient(String id, String reason) {
         if (ingredientMap.containsKey(id)) {
             Ingredient ing = ingredientMap.get(id);
-            logArchive(ing, reason);
+
+            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            String logEntry = String.format("%s,INGREDIENT,%s,%s,%d,%s,%s",
+                    timestamp, ing.getId(), ing.getName(), ing.getStock(), ing.getUnit(), reason);
+            FileUtil.appendLine(AppConfig.ARCHIVES_FILE, logEntry);
             ingredientMap.remove(id);
             saveInventory();
             notifyRefresh();
@@ -211,6 +217,8 @@ if (ing.isCritical() && ing.getStock() < totalRequired) {
              PrintWriter pw = new PrintWriter(fw)) {
             String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             pw.printf("%s,%s,%s,%d,%s,%s%n", timestamp, ing.getId(), ing.getName(), ing.getStock(), ing.getUnit(), reason);
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,25 +1,25 @@
-B01,Beef Burger Sandwich (B1T1),40.00,/org/example/angelsburgerpos/images/Beef Burger Sandwich.jpg,Burger,100
-B02,Cheeseburger Sandwich (B1T1),50.00,/org/example/angelsburgerpos/images/Cheeseburger Sandwich.jpg,Burger,100
-S01,Cheesy Hotdog Sandwich (B1T1),37.00,/org/example/angelsburgerpos/images/Cheesy Hotdog Sandwich.jpg,Sandwich,100
-S02,Jumbo Cheese Footlong Sandwich,56.00,/org/example/angelsburgerpos/images/Jumbo Cheese Footlong Sandwich.jpg,Sandwich,100
-S03,Cheesy Hungarian Sandwich,70.00,/org/example/angelsburgerpos/images/Cheesy Hungarian Sandwich.jpg,Sandwich,100
-S04,Ham Sandwich,18.00,/org/example/angelsburgerpos/images/Ham Sandwich.jpg,Sandwich,100
-S05,Ham & Cheese Sandwich,23.00,/org/example/angelsburgerpos/images/Ham & Cheese Sandwich.jpg,Sandwich,100
-S06,Ham & Egg Sandwich,30.00,/org/example/angelsburgerpos/images/Ham & Egg Sandwich.jpg,Sandwich,100
-S07,Ham Cheese & Egg Sandwich,35.00,/org/example/angelsburgerpos/images/Ham Cheese & Egg Sandwich.jpg,Sandwich,100
-S08,Bacon Sandwich,25.00,/org/example/angelsburgerpos/images/Bacon Sandwich.jpg,Sandwich,100
-S09,Bacon & Cheese Sandwich,30.00,/org/example/angelsburgerpos/images/Bacon & Cheese Sandwich.jpg,Sandwich,100
-S10,Bacon & Egg Sandwich,37.00,/org/example/angelsburgerpos/images/Bacon & Egg Sandwich.jpg,Sandwich,100
-S11,Bacon Cheese & Egg Sandwich,42.00,/org/example/angelsburgerpos/images/Bacon, Cheese & Egg Sandwich.jpg,Sandwich,100
-S12,Egg Sandwich,20.00,/org/example/angelsburgerpos/images/Egg Sandwich.jpg,Sandwich,100
-A01,Extra Cheese,5.00,/org/example/angelsburgerpos/images/Extra Cheese.jpg,Addon,100
-A02,Extra Egg,15.00,/org/example/angelsburgerpos/images/Extra Egg.jpg,Addon,100
-A03,Extra Ham,14.00,/org/example/angelsburgerpos/images/Extra Ham.jpg,Addon,100
-A04,Extra Bacon,25.00,/org/example/angelsburgerpos/images/Extra Bacon.jpg,Addon,100
-D01,Lipton Iced Tea,35.00,/org/example/angelsburgerpos/images/Lipton Iced Tea.jpg,Drink,100
-D02,Bottled Water,15.00,/org/example/angelsburgerpos/images/Bottled Water.jpg,Drink,100
-D03,Mug (Glass),20.00,/org/example/angelsburgerpos/images/Mug.jpg,Drink,100
-D04,Mirinda (Glass),20.00,/org/example/angelsburgerpos/images/Mirinda.jpg,Drink,100
-D05,Pepsi (Glass),20.00,/org/example/angelsburgerpos/images/Pepsi.jpg,Drink,100
-D06,7-Up (Glass),20.00,/org/example/angelsburgerpos/images/7-up.jpg,Drink,100
-D07,Softdrinks (Plastic Bottle),25.00,/org/example/angelsburgerpos/images/Soft Drinks.jpg,Drink,100
+B01,Beef Burger Sandwich (B1T1),40.00,B01.jpg,Burger,100
+B02,Cheeseburger Sandwich (B1T1),50.00,B02.jpg,Burger,100
+S01,Cheesy Hotdog Sandwich (B1T1),37.00,S01.jpg,Sandwich,100
+S02,Jumbo Cheese Footlong Sandwich,56.00,S02.jpg,Sandwich,100
+S03,Cheesy Hungarian Sandwich,70.00,S03.jpg,Sandwich,100
+S04,Ham Sandwich,18.00,S04.jpg,Sandwich,100
+S05,Ham & Cheese Sandwich,23.00,S05.jpg,Sandwich,100
+S06,Ham & Egg Sandwich,30.00,S06.jpg,Sandwich,100
+S07,Ham Cheese & Egg Sandwich,35.00,S07.jpg,Sandwich,100
+S08,Bacon Sandwich,25.00,S08.jpg,Sandwich,100
+S09,Bacon & Cheese Sandwich,30.00,S09.jpg,Sandwich,100
+S10,Bacon & Egg Sandwich,37.00,S10.jpg,Sandwich,100
+S11,Bacon Cheese & Egg Sandwich,42.00,S11.jpg,Sandwich,100
+S12,Egg Sandwich,20.00,S12.jpg,Sandwich,100
+A01,Extra Cheese,5.00,A01.jpg,Addon,100
+A02,Extra Egg,15.00,A02.jpg,Addon,100
+A03,Extra Ham,14.00,A03.jpg,Addon,100
+A04,Extra Bacon,25.00,A04.jpg,Addon,100
+D01,Lipton Iced Tea,35.00,D01.jpg,Drink,100
+D02,Bottled Water,15.00,D02.jpg,Drink,100
+D03,Mug (Glass),20.00,D03.jpg,Drink,100
+D04,Mirinda (Glass),20.00,D04.jpg,Drink,100
+D05,Pepsi (Glass),20.00,D05.jpg,Drink,100
+D06,7-Up (Glass),20.00,D06.jpg,Drink,100
+D07,Softdrinks (Plastic Bottle),25.00,D07.jpg,Drink,100
