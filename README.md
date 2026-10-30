@@ -9,7 +9,6 @@ A robust, JavaFX-based Point of Sale (POS) and Inventory Management system desig
 - [Installation & Setup](#installation--setup)
 - [Configuration & Data](#configuration--data)
 - [Mobile Kiosk API](#mobile-kiosk-api)
-- [Contributors](#contributors)
 
 ---
 
@@ -121,13 +120,6 @@ The application starts a local server to listen for mobile orders.
   { "productId": "S04", "quantity": 1 }
 ]
 ```
-## Contributors
-
-* **Prince Olaguera** - Lead Developer / Admin
-* **Rowena Acabado** - Contributor
-* **James Agmata** - Contributor
-* **Japhet Mondigo** - Contributor
-* **Ayende** - Contributor
 
 ---
 
